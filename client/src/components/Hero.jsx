@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   ArrowRight, 
@@ -12,9 +12,37 @@ import {
   Shield,
   Zap
 } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 function Hero() {
   const [hoveredStat, setHoveredStat] = useState(null)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const { login, user } = useAuth()
+  const navigate = useNavigate()
+
+  // Navigate to dashboard when user becomes available after login
+  useEffect(() => {
+    if (user && isLoggingIn) {
+      setIsLoggingIn(false)
+      navigate('/dashboard')
+    }
+  }, [user, isLoggingIn, navigate])
+
+  const handleGetStarted = async () => {
+    try {
+      if (user) {
+        navigate('/dashboard')
+      } else {
+        setIsLoggingIn(true)
+        await login()
+        // Navigation will be handled by useEffect
+      }
+    } catch (error) {
+      console.error('Error in handleGetStarted:', error)
+      setIsLoggingIn(false)
+    }
+  }
 
   const stats = [
     { icon: Users, label: "Active Users", value: "50K+", color: "text-blue-600" },
@@ -125,6 +153,7 @@ function Hero() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={handleGetStarted}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 <span>Start Free Trial</span>

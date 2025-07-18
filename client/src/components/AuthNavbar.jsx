@@ -110,16 +110,29 @@ const Navbar = () => {
                     onClick={() => setShowDropdown(!showDropdown)}
                     className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   >
-                    <img
-                      src={user.photoURL || '/default-avatar.png'}
-                      alt={user.displayName || 'User'}
-                      className="w-8 h-8 rounded-full border-2 border-gray-200"
-                    />
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt={user.displayName || 'User'}
+                        className="w-8 h-8 rounded-full border-2 border-gray-200 object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className={`w-8 h-8 rounded-full border-2 border-gray-200 bg-blue-500 flex items-center justify-center ${user.photoURL ? 'hidden' : 'flex'}`}
+                    >
+                      <span className="text-white text-sm font-medium">
+                        {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
                     <div className="flex flex-col items-start">
                       <span className="text-sm font-medium text-gray-700">
-                        {user.displayName || 'User'}
+                        {user.displayName || user.email?.split('@')[0] || 'User'}
                       </span>
-                      <span className="text-xs text-gray-500">Pro Plan</span>
+                      <span className="text-xs text-gray-500">{user.email}</span>
                     </div>
                     <ChevronDown className="w-4 h-4 text-gray-500" />
                   </motion.button>
@@ -225,16 +238,27 @@ const Navbar = () => {
                 {user ? (
                   <div className="pt-4 border-t border-gray-200 space-y-2">
                     <div className="flex items-center space-x-3 py-2">
-                      <img
-                        src={user.photoURL || '/default-avatar.png'}
-                        alt={user.displayName || 'User'}
-                        className="w-8 h-8 rounded-full border-2 border-gray-200"
-                      />
+                      {user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName || 'User'}
+                          className="w-8 h-8 rounded-full border-2 border-gray-200 object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-8 h-8 rounded-full border-2 border-gray-200 bg-blue-500 flex items-center justify-center ${user.photoURL ? 'hidden' : 'flex'}`}>
+                        <span className="text-white text-sm font-medium">
+                          {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                        </span>
+                      </div>
                       <div>
                         <div className="text-sm font-medium text-gray-700">
-                          {user.displayName || 'User'}
+                          {user.displayName || user.email?.split('@')[0] || 'User'}
                         </div>
-                        <div className="text-xs text-gray-500">Pro Plan</div>
+                        <div className="text-xs text-gray-500">{user.email}</div>
                       </div>
                     </div>
                     <a href="/dashboard" className="block py-2 text-gray-600 hover:text-blue-600 transition-colors">

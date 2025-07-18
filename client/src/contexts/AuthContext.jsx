@@ -35,13 +35,55 @@ export const AuthProvider = ({ children }) => {
 
           if (response.ok) {
             const data = await response.json();
-            setUser({
-              ...data.user,
-              idToken
-            });
+            console.log('Backend verification successful:', data.message);
+            
+            // If backend returns development user, use real Firebase user data instead
+            if (data.user.uid === 'dev-user-id') {
+              console.log('Using real Firebase user data instead of mock data');
+              console.log('Firebase user:', {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+                emailVerified: firebaseUser.emailVerified
+              });
+              setUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+                emailVerified: firebaseUser.emailVerified,
+                idToken
+              });
+            } else {
+              setUser({
+                ...data.user,
+                idToken
+              });
+            }
           } else {
             console.error('Backend verification failed');
-            setUser(null);
+            // In development, we might still want to use the Firebase user
+            if (import.meta.env.DEV) {
+              console.log('Using client-side Firebase user in development mode');
+              console.log('Firebase user data:', {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+                emailVerified: firebaseUser.emailVerified
+              });
+              setUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+                emailVerified: firebaseUser.emailVerified,
+                idToken
+              });
+            } else {
+              setUser(null);
+            }
           }
         } catch (error) {
           console.error('Error verifying user:', error);
@@ -61,9 +103,12 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       const result = await signInWithGoogle();
-      // User will be set by the onAuthStateChanged listener
+      console.log('Google sign-in successful:', result);
+      
+      // Return success, let the component handle navigation
       return result;
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.message);
       throw error;
     } finally {

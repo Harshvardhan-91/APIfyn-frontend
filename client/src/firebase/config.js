@@ -25,7 +25,27 @@ provider.setCustomParameters({
   prompt: 'select_account'
 });
 
-export const signInWithGoogle = () => signInWithPopup(auth, provider);
-export const signOutUser = () => signOut(auth);
+// Add additional scopes if needed
+provider.addScope('email');
+provider.addScope('profile');
+
+export const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    throw error;
+  }
+};
+
+export const signOutUser = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error('Error signing out:', error);
+    throw error;
+  }
+};
 
 export default app;

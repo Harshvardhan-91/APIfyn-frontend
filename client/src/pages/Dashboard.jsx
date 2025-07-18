@@ -62,11 +62,12 @@ const Dashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.displayName || 'there'}!
+            Welcome back, {user?.displayName || user?.email?.split('@')[0] || 'there'}!
           </h1>
           <p className="text-gray-600">
             Here's what's happening with your automations today.
           </p>
+ 
         </div>
 
         {/* Stats Grid */}

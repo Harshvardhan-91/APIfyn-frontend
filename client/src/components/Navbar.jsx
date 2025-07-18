@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, Zap, ArrowRight } from 'lucide-react'
+import { Menu, X, ChevronDown, Zap, ArrowRight, Bell, User } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [featuresOpen, setFeaturesOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const { user, login, logout } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +20,45 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Navigate to dashboard when user becomes available after login
+  useEffect(() => {
+    if (user && isLoggingIn) {
+      setIsLoggingIn(false)
+      navigate('/dashboard')
+    }
+  }, [user, isLoggingIn, navigate])
+
+  const handleSignIn = async () => {
+    try {
+      setIsLoggingIn(true)
+      await login()
+      // Navigation will be handled by useEffect
+    } catch (error) {
+      console.error('Error signing in:', error)
+      setIsLoggingIn(false)
+    }
+  }
+
+  const handleGetStarted = async () => {
+    try {
+      if (user) {
+        navigate('/dashboard')
+      } else {
+        setIsLoggingIn(true)
+        await login()
+        // Navigation will be handled by useEffect
+      }
+    } catch (error) {
+      console.error('Error in get started:', error)
+      setIsLoggingIn(false)
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    setProfileOpen(false)
+  }
 
   const navItems = [
     { label: 'Features', href: '#features' },
@@ -77,28 +122,114 @@ const Navbar = () => {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-5 py-2.5 text-gray-700 hover:text-gray-900 transition-all duration-200 font-semibold rounded-xl hover:bg-gray-50/80 backdrop-blur-sm"
-            >
-              Sign In
-            </motion.button>
-            <motion.button
-              whileHover={{ 
-                scale: 1.02, 
-                boxShadow: "0 12px 30px -5px rgba(59, 130, 246, 0.4)",
-                y: -2
-              }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative px-6 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl font-semibold overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <span className="relative z-10 flex items-center space-x-2">
-                <span>Get Started Free</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </motion.button>
+            {user ? (
+              <>
+                {/* Notifications */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-lg hover:bg-gray-50"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-xs text-white font-medium">2</span>
+                  </span>
+                </motion.button>
+
+                {/* Profile Dropdown */}
+                <div className="relative">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    {user.photoURL ? (
+                      <img 
+                        src={user.photoURL} 
+                        alt={user.displayName || 'User'} 
+                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-gray-200 ${user.photoURL ? 'hidden' : 'flex'}`}>
+                      <span className="text-white text-sm font-medium">
+                        {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                  </motion.button>
+
+                  {/* Profile Dropdown Menu */}
+                  <AnimatePresence>
+                    {profileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+                      >
+                        <button
+                          onClick={() => { navigate('/dashboard'); setProfileOpen(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          Dashboard
+                        </button>
+                        <button
+                          onClick={() => { navigate('/profile'); setProfileOpen(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          Profile
+                        </button>
+                        <button
+                          onClick={() => { navigate('/settings'); setProfileOpen(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          Settings
+                        </button>
+                        <div className="border-t border-gray-200 my-1"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                        >
+                          Sign Out
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </>
+            ) : (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSignIn}
+                  className="px-5 py-2.5 text-gray-700 hover:text-gray-900 transition-all duration-200 font-semibold rounded-xl hover:bg-gray-50/80 backdrop-blur-sm"
+                >
+                  Sign In
+                </motion.button>
+                <motion.button
+                  whileHover={{ 
+                    scale: 1.02, 
+                    boxShadow: "0 12px 30px -5px rgba(59, 130, 246, 0.4)",
+                    y: -2
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleGetStarted}
+                  className="group relative px-6 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl font-semibold overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <span className="relative z-10 flex items-center space-x-2">
+                    <span>Get Started Free</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </motion.button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -139,23 +270,59 @@ const Navbar = () => {
                   </motion.a>
                 ))}
                 <div className="pt-4 space-y-3 border-t border-gray-100">
-                  <motion.button
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="block w-full px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 rounded-lg font-medium text-left"
-                  >
-                    Login
-                  </motion.button>
-                  <motion.button
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold shadow-lg"
-                  >
-                    <span>Get Started</span>
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </motion.button>
+                  {user ? (
+                    <>
+                      <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 }}
+                        onClick={() => { navigate('/dashboard'); setIsOpen(false); }}
+                        className="block w-full px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 rounded-lg font-medium text-left"
+                      >
+                        Dashboard
+                      </motion.button>
+                      <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 }}
+                        onClick={() => { navigate('/profile'); setIsOpen(false); }}
+                        className="block w-full px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 rounded-lg font-medium text-left"
+                      >
+                        Profile
+                      </motion.button>
+                      <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 }}
+                        onClick={handleLogout}
+                        className="block w-full px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 rounded-lg font-medium text-left"
+                      >
+                        Sign Out
+                      </motion.button>
+                    </>
+                  ) : (
+                    <>
+                      <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 }}
+                        onClick={handleSignIn}
+                        className="block w-full px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 rounded-lg font-medium text-left"
+                      >
+                        Sign In
+                      </motion.button>
+                      <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 }}
+                        onClick={handleGetStarted}
+                        className="flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold shadow-lg"
+                      >
+                        <span>Get Started</span>
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </motion.button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
