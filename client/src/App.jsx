@@ -13,6 +13,11 @@ import Footer from './components/Footer'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
+import Workflows from './pages/Workflows'
+import Integrations from './pages/Integrations'
+import Analytics from './pages/Analytics'
+import Templates from './pages/Templates'
+import WorkflowBuilder from './pages/WorkflowBuilder'
 
 const LandingPage = () => {
   return (
@@ -44,6 +49,51 @@ const App = () => {
               <div className="min-h-screen bg-gray-50">
                 <AuthNavbar />
                 <Dashboard />
+              </div>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/workflows" element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50">
+                <AuthNavbar />
+                <Workflows />
+              </div>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/workflows/create" element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50">
+                <AuthNavbar />
+                <WorkflowBuilder />
+              </div>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/integrations" element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50">
+                <AuthNavbar />
+                <Integrations />
+              </div>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/analytics" element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50">
+                <AuthNavbar />
+                <Analytics />
+              </div>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/templates" element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50">
+                <AuthNavbar />
+                <Templates />
               </div>
             </ProtectedRoute>
           } />

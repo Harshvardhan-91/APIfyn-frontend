@@ -35,18 +35,10 @@ export const AuthProvider = ({ children }) => {
 
           if (response.ok) {
             const data = await response.json();
-            console.log('Backend verification successful:', data.message);
+
             
             // If backend returns development user, use real Firebase user data instead
             if (data.user.uid === 'dev-user-id') {
-              console.log('Using real Firebase user data instead of mock data');
-              console.log('Firebase user:', {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email,
-                displayName: firebaseUser.displayName,
-                photoURL: firebaseUser.photoURL,
-                emailVerified: firebaseUser.emailVerified
-              });
               setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,

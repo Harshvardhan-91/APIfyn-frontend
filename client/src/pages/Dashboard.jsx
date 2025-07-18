@@ -3,21 +3,48 @@ import { motion } from 'framer-motion';
 import { 
   BarChart3, 
   Zap, 
-  Clock, 
   CheckCircle, 
-  AlertCircle, 
-  Plus,
   Activity,
-  Settings,
+  TrendingUp,
+  Plus,
+  Link2,
+  ChevronRight,
+  Clock,
   Users,
-  TrendingUp
+  ArrowUpRight,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState({
+    totalWorkflows: 12,
+    executionsToday: 156,
+    connectedApps: 6,
+    thisWeek: 1234,
+    recentActivity: [
+      {
+        id: 1,
+        title: "Customer Onboarding",
+        type: "workflow",
+        status: "executed",
+        time: "10:33:18 PM",
+        icon: "✅"
+      },
+      {
+        id: 2,
+        title: "Slack",
+        type: "integration",
+        status: "connected",
+        time: "9:33:18 PM",
+        icon: "✅"
+      }
+    ]
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -85,7 +112,7 @@ const Dashboard = () => {
               <span className="text-sm font-medium text-green-600">+12%</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-1">
-              {dashboardData?.workflows.total || 0}
+              {dashboardData?.totalWorkflows || 0}
             </h3>
             <p className="text-gray-600 text-sm">Total Workflows</p>
           </motion.div>
@@ -101,11 +128,11 @@ const Dashboard = () => {
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <span className="text-sm font-medium text-green-600">
-                {dashboardData?.executions.successRate || 0}%
+                98.7%
               </span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-1">
-              {dashboardData?.executions.today || 0}
+              {dashboardData?.executionsToday || 0}
             </h3>
             <p className="text-gray-600 text-sm">Executions Today</p>
           </motion.div>
@@ -121,11 +148,11 @@ const Dashboard = () => {
                 <Activity className="w-6 h-6 text-purple-600" />
               </div>
               <span className="text-sm font-medium text-green-600">
-                {dashboardData?.workflows.active || 0} active
+                8 active
               </span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-1">
-              {dashboardData?.integrations.connected || 0}
+              {dashboardData?.connectedApps || 0}
             </h3>
             <p className="text-gray-600 text-sm">Connected Apps</p>
           </motion.div>
@@ -143,7 +170,7 @@ const Dashboard = () => {
               <span className="text-sm font-medium text-green-600">+8%</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-1">
-              {dashboardData?.executions.thisWeek || 0}
+              {dashboardData?.thisWeek || 0}
             </h3>
             <p className="text-gray-600 text-sm">This Week</p>
           </motion.div>
@@ -208,19 +235,19 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Active</span>
                   <span className="font-medium text-green-600">
-                    {dashboardData?.workflows.active || 0}
+                    8
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Paused</span>
                   <span className="font-medium text-yellow-600">
-                    {dashboardData?.workflows.paused || 0}
+                    2
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Failed</span>
                   <span className="font-medium text-red-600">
-                    {dashboardData?.workflows.failed || 0}
+                    1
                   </span>
                 </div>
               </div>
