@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, Zap, ArrowRight, User, Settings, LogOut, Bell } from 'lucide-react'
+import { Menu, X, ChevronDown, Zap, ArrowRight, User, Settings, LogOut, Bell, BarChart3, Link, Activity } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
   const { user, login, logout, loading } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,10 +37,11 @@ const Navbar = () => {
   }
 
   const navItems = [
-    { label: 'Features', href: '#features' },
-    { label: 'Templates', href: '#templates' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'How it Works', href: '#how-it-works' }
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Workflows', href: '/workflows' },
+    { label: 'Integrations', href: '/integrations' },
+    { label: 'Analytics', href: '/analytics' },
+    { label: 'Templates', href: '/templates' }
   ]
 
   return (
@@ -57,6 +60,7 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div 
             whileHover={{ scale: 1.02 }}
+            onClick={() => navigate('/')}
             className="flex items-center space-x-3 cursor-pointer"
           >
             <div className="relative">
@@ -67,9 +71,9 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
-                FlowAPI
+                APIfyn
               </span>
-              <span className="text-xs text-gray-500 -mt-1">Automation Platform</span>
+              <span className="text-xs text-gray-500 -mt-1">API Automation</span>
             </div>
           </motion.div>
 
@@ -151,9 +155,31 @@ const Navbar = () => {
                           href="/dashboard"
                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         >
-                          <User className="w-4 h-4 mr-3" />
+                          <BarChart3 className="w-4 h-4 mr-3" />
                           Dashboard
                         </a>
+                        <a
+                          href="/workflows"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          <Zap className="w-4 h-4 mr-3" />
+                          Workflows
+                        </a>
+                        <a
+                          href="/integrations"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          <Link className="w-4 h-4 mr-3" />
+                          Integrations
+                        </a>
+                        <a
+                          href="/analytics"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          <Activity className="w-4 h-4 mr-3" />
+                          Analytics
+                        </a>
+                        <hr className="my-2 border-gray-200" />
                         <a
                           href="/profile"
                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -263,6 +289,15 @@ const Navbar = () => {
                     </div>
                     <a href="/dashboard" className="block py-2 text-gray-600 hover:text-blue-600 transition-colors">
                       Dashboard
+                    </a>
+                    <a href="/workflows" className="block py-2 text-gray-600 hover:text-blue-600 transition-colors">
+                      Workflows
+                    </a>
+                    <a href="/integrations" className="block py-2 text-gray-600 hover:text-blue-600 transition-colors">
+                      Integrations
+                    </a>
+                    <a href="/analytics" className="block py-2 text-gray-600 hover:text-blue-600 transition-colors">
+                      Analytics
                     </a>
                     <a href="/profile" className="block py-2 text-gray-600 hover:text-blue-600 transition-colors">
                       Profile

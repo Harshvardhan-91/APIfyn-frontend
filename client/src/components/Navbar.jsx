@@ -83,6 +83,7 @@ const Navbar = () => {
           {/* Logo */}
           <motion.div 
             whileHover={{ scale: 1.02 }}
+            onClick={() => navigate('/')}
             className="flex items-center space-x-3 cursor-pointer"
           >
             <div className="relative">
@@ -93,9 +94,9 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
-                FlowAPI
+                APIfyn
               </span>
-              <span className="text-xs text-gray-500 font-medium -mt-1">Workflow Automation</span>
+              <span className="text-xs text-gray-500 font-medium -mt-1">API Automation</span>
             </div>
           </motion.div>
 

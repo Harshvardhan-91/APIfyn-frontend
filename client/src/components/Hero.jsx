@@ -52,8 +52,8 @@ function Hero() {
   ]
 
   const features = [
-    { text: "500+ app integrations (Gmail, Slack, Sheets)", icon: CheckCircle },
-    { text: "Visual drag & drop workflow builder", icon: CheckCircle },
+    { text: "500+ API integrations (REST, GraphQL, Webhooks)", icon: CheckCircle },
+    { text: "Visual API workflow builder", icon: CheckCircle },
     { text: "AI-powered automation and analytics", icon: CheckCircle },
     { text: "Real-time monitoring and notifications", icon: CheckCircle }
   ]
@@ -110,10 +110,10 @@ function Hero() {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-5xl lg:text-6xl font-bold leading-tight text-gray-900"
             >
-              Automate Workflows,
+              Automate APIs,
               <br />
               <span className="text-blue-600">
-                Scale Operations
+                Scale Seamlessly
               </span>
             </motion.h1>
 
@@ -124,8 +124,8 @@ function Hero() {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="text-xl text-gray-600 leading-relaxed max-w-xl"
             >
-              Connect your favorite apps and automate repetitive tasks in minutes. 
-              No coding required - just drag, drop, and deploy powerful workflows.
+              Connect APIs and automate complex workflows with ease. 
+              Build powerful integrations without code - just design, deploy, and scale.
             </motion.p>
 
             {/* Feature list */}
@@ -250,7 +250,7 @@ function Hero() {
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                       <Workflow className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-semibold text-gray-900">Workflow Dashboard</span>
+                    <span className="font-semibold text-gray-900">APIfyn Dashboard</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-red-400 rounded-full"></div>

@@ -13,7 +13,7 @@ const Footer = () => {
     { name: "Twitter", href: "#", icon: Twitter },
     { name: "Github", href: "#", icon: Github },
     { name: "LinkedIn", href: "#", icon: Linkedin },
-    { name: "Email", href: "mailto:hello@flowapi.com", icon: Mail }
+    { name: "Email", href: "mailto:hello@apifyn.com", icon: Mail }
   ]
 
   return (
@@ -31,8 +31,8 @@ const Footer = () => {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-gray-900">FlowAPI</span>
-                <span className="text-sm text-gray-500 -mt-1">Empowering workflow automation, one dashboard at a time.</span>
+                <span className="text-xl font-bold text-gray-900">APIfyn</span>
+                <span className="text-sm text-gray-500 -mt-1">Simplifying API automation, one workflow at a time.</span>
               </div>
             </div>
           </div>
