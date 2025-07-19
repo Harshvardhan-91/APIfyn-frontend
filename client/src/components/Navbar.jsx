@@ -122,17 +122,17 @@ const Navbar = () => {
           </div>
 
           {/* Desktop CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
                 {/* Notifications */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-lg hover:bg-gray-50"
+                  className="relative p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200 rounded-lg hover:bg-gray-50"
                 >
                   <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 rounded-full flex items-center justify-center">
                     <span className="text-xs text-white font-medium">2</span>
                   </span>
                 </motion.button>
@@ -140,8 +140,8 @@ const Navbar = () => {
                 {/* Profile Dropdown */}
                 <div className="relative">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setProfileOpen(!profileOpen)}
                     className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                   >
@@ -209,25 +209,29 @@ const Navbar = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSignIn}
-                  className="px-5 py-2.5 text-gray-700 hover:text-gray-900 transition-all duration-200 font-semibold rounded-xl hover:bg-gray-50/80 backdrop-blur-sm"
+                  disabled={isLoggingIn}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium rounded-lg hover:bg-gray-50"
                 >
                   Sign In
                 </motion.button>
                 <motion.button
-                  whileHover={{ 
-                    scale: 1.02, 
-                    boxShadow: "0 12px 30px -5px rgba(59, 130, 246, 0.4)",
-                    y: -2
-                  }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleGetStarted}
-                  className="group relative px-6 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl font-semibold overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isLoggingIn}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  <span className="relative z-10 flex items-center space-x-2">
-                    <span>Get Started Free</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {isLoggingIn ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Getting Started...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Get Started</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </motion.button>
               </>
             )}
@@ -317,10 +321,20 @@ const Navbar = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
                         onClick={handleGetStarted}
-                        className="flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold shadow-lg"
+                        disabled={isLoggingIn}
+                        className="flex items-center justify-center w-full px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm transition-colors duration-200"
                       >
-                        <span>Get Started</span>
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        {isLoggingIn ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                            <span>Getting Started...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Get Started</span>
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </>
+                        )}
                       </motion.button>
                     </>
                   )}
