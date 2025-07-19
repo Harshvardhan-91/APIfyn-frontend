@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
           const idToken = await firebaseUser.getIdToken();
           
           // Verify with backend
-          const response = await fetch('http://localhost:5000/api/auth/verify', {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/verify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
       
       // Call backend logout if user exists
       if (user && user.idToken) {
-        await fetch('http://localhost:5000/api/auth/logout', {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${user.idToken}`,

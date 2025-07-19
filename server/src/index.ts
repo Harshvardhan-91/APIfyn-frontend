@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import admin from 'firebase-admin';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from './utils/logger';
+import { getDatabaseUrl } from './utils/env';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
@@ -22,6 +23,11 @@ const logger = createLogger();
 // Initialize Prisma Client
 export const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
+  datasources: {
+    db: {
+      url: getDatabaseUrl(),
+    },
+  },
 });
 
 const app: Application = express();
@@ -63,14 +69,12 @@ const initializeFirebase = async (): Promise<void> => {
 // Initialize database connection
 const initializeDatabase = async (): Promise<void> => {
   try {
-    // Check if DATABASE_URL is properly set
-    if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL environment variable is not set');
-    }
-
+    // Get the properly formatted database URL
+    const dbUrl = getDatabaseUrl();
+    
     // Log the database host (without credentials) for debugging
-    const dbUrl = new URL(process.env.DATABASE_URL);
-    logger.info(`Attempting to connect to database at: ${dbUrl.hostname}:${dbUrl.port}`);
+    const parsedUrl = new URL(dbUrl);
+    logger.info(`Attempting to connect to database at: ${parsedUrl.hostname}:${parsedUrl.port}`);
 
     await prisma.$connect();
     logger.info('Database connected successfully');
@@ -107,8 +111,29 @@ app.use(helmet({
 }));
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173', // Local development
+  process.env.CLIENT_URL, // Frontend URL from environment
+  process.env.FRONTEND_URL, // Alternative frontend URL env var
+].filter(Boolean); // Remove any undefined values
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // In development, be more permissive
+      if (process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        logger.warn(`CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
