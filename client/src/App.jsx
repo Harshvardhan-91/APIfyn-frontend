@@ -18,6 +18,10 @@ import Integrations from './pages/Integrations'
 import Analytics from './pages/Analytics'
 import Templates from './pages/Templates'
 import WorkflowBuilder from './pages/WorkflowBuilder'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsAndConditions from './pages/TermsAndConditions'
+import ShippingDelivery from './pages/ShippingDelivery'
+import ContactUs from './pages/ContactUs'
 
 const LandingPage = () => {
   return (
@@ -42,6 +46,10 @@ const App = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/shipping-delivery" element={<ShippingDelivery />} />
+          <Route path="/contact-us" element={<ContactUs />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={

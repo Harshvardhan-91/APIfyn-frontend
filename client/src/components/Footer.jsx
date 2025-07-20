@@ -1,5 +1,6 @@
 import React from 'react'
 import { Twitter, Github, Linkedin, Mail, Zap } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   const footerLinks = [
@@ -70,14 +71,17 @@ const Footer = () => {
             © 2025 FlowAPI. All rights reserved.
           </p>
           <div className="flex items-center space-x-6">
-            <a href="#" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
+            <a href="/privacy-policy" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
               Privacy Policy
             </a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
-              Terms of Service
+            <a href="/terms-and-conditions" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
+              Terms & Conditions
             </a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
-              Cookies Settings
+            <a href="/shipping-delivery" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
+              Shipping & Delivery
+            </a>
+            <a href="/contact-us" className="text-gray-500 hover:text-gray-700 text-sm transition-colors duration-200">
+              Contact Us
             </a>
           </div>
         </div>
