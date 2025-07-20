@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { PaymentProvider } from './contexts/PaymentContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthNavbar from './components/AuthNavbar'
 import Navbar from './components/Navbar'
@@ -42,10 +43,11 @@ const LandingPage = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
+      <PaymentProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/shipping-delivery" element={<ShippingDelivery />} />
@@ -125,6 +127,7 @@ const App = () => {
           } />
         </Routes>
       </Router>
+      </PaymentProvider>
     </AuthProvider>
   )
 }

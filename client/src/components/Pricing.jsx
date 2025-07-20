@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { usePayment } from '../contexts/PaymentContext'
+import { useAuth } from '../contexts/AuthContext'
 import { Check, Star, Zap, Crown, ChevronDown, Shield, Headphones, Users, Database, Rocket, Clock, ArrowRight, Building, Sparkles } from 'lucide-react'
 
 const Pricing = () => {
@@ -9,9 +10,12 @@ const Pricing = () => {
   const isInView = useInView(ref, { once: true, amount: 0.2 })
   const [billingPeriod, setBillingPeriod] = useState('monthly')
   const [expandedFaq, setExpandedFaq] = useState(null)
+  const { initiatePayment, isLoading, error } = usePayment()
+  const { user } = useAuth()
 
   const plans = [
     {
+      id: "starter",
       name: "Starter",
       monthlyPrice: "$0",
       yearlyPrice: "$0",
@@ -31,6 +35,7 @@ const Pricing = () => {
       highlight: false
     },
     {
+      id: "professional",
       name: "Professional", 
       monthlyPrice: "$20",
       yearlyPrice: "$16",
@@ -46,12 +51,13 @@ const Pricing = () => {
         "Advanced analytics dashboard",
         "Webhook support"
       ],
-      buttonText: "Start Professional",
+      buttonText: "Get premium",
       buttonStyle: "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl",
       popular: true,
       highlight: true
     },
     {
+      id: "enterprise",
       name: "Enterprise",
       monthlyPrice: "$30",
       yearlyPrice: "$25", 
@@ -67,7 +73,7 @@ const Pricing = () => {
         "White-label options",
         "SLA guarantees"
       ],
-      buttonText: "Contact Sales",
+      buttonText: "Get Pro",
       buttonStyle: "bg-white border-2 border-purple-300 text-purple-700 hover:border-purple-400 hover:bg-purple-50",
       popular: false,
       highlight: false
@@ -117,6 +123,27 @@ const Pricing = () => {
       a: "We'll notify you before you reach your limits. If you exceed them, workflows will pause until the next billing cycle or you can upgrade your plan. We never charge overage fees without your explicit consent."
     }
   ]
+
+  const handleSubscribe = async (plan) => {
+    if (!user) {
+      // If user is not logged in, redirect to login or show login modal
+      // For now, we'll just alert
+      alert("Please login to subscribe to a plan")
+      return
+    }
+
+    if (plan.id === 'enterprise') {
+      // For enterprise plan, redirect to contact sales or show contact modal
+      window.location.href = '/contact-us'
+      return
+    }
+
+    try {
+      await initiatePayment(plan.id, billingPeriod)
+    } catch (err) {
+      console.error('Payment initiation failed:', err)
+    }
+  }
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index)
@@ -234,10 +261,14 @@ const Pricing = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-200 ${plan.buttonStyle}`}
+                  onClick={() => handleSubscribe(plan)}
+                  disabled={isLoading}
+                  className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-200 ${plan.buttonStyle} 
+                    ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {plan.buttonText}
+                  {isLoading ? 'Processing...' : plan.buttonText}
                 </motion.button>
+                {error && <p className="mt-2 text-red-600 text-sm">{error}</p>}
               </div>
             </motion.div>
           ))}
