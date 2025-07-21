@@ -51,6 +51,7 @@ const Analytics = () => {
     }
   };
 
+  
   const workflowStats = [
     { name: 'Customer Onboarding', executions: 456, success: 99.1, errors: 4, trend: 'up' },
     { name: 'Lead Qualification', executions: 289, success: 97.5, errors: 7, trend: 'up' },
