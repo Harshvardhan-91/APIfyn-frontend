@@ -287,7 +287,7 @@ const Pricing = () => {
                 Trusted by Industry Leaders
               </h3>
               <p className="text-gray-600 mb-8 text-lg">
-                Join <span className="font-semibold text-blue-600">15,000+</span> teams already automating their workflows with StreamlineAPI
+                Join <span className="font-semibold text-blue-600"></span> teams already automating their workflows with APIfyn
               </p>
               
               {/* Company Logos Grid */}
@@ -316,7 +316,7 @@ const Pricing = () => {
                   <span className="font-semibold">4.9/5</span>
                 </div>
                 <div className="w-px h-4 bg-gray-300"></div>
-                <span>Over 2M+ workflows automated</span>
+                <span>Over 100 workflows automated</span>
                 <div className="w-px h-4 bg-gray-300"></div>
                 <span>99.9% uptime guaranteed</span>
               </div>

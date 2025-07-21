@@ -100,7 +100,7 @@ function Hero() {
               className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-medium"
             >
               <Zap className="w-4 h-4" />
-              <span>Trusted by 50,000+ businesses worldwide</span>
+              <span>Trusted by many businesses worldwide</span>
             </motion.div>
 
             {/* Main heading */}
