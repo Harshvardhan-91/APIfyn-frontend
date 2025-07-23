@@ -79,16 +79,24 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!user?.idToken) return;
+      
       try {
-        const response = await fetch('http://localhost:5000/api/user/dashboard', {
+        setLoading(true);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/dashboard`, {
           headers: {
             'Authorization': `Bearer ${user.idToken}`,
+            'Content-Type': 'application/json',
           },
         });
 
         if (response.ok) {
-          const data = await response.json();
-          setDashboardData(data.data);
+          const result = await response.json();
+          if (result.success) {
+            setDashboardData(result.data);
+          }
+        } else {
+          console.error('Failed to fetch dashboard data:', response.statusText);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -97,9 +105,7 @@ const Dashboard = () => {
       }
     };
 
-    if (user) {
-      fetchDashboardData();
-    }
+    fetchDashboardData();
   }, [user]);
 
 
@@ -248,6 +254,83 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Plan Usage Section */}
+        {dashboardData?.plan && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {dashboardData.plan.name} Plan
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {dashboardData.plan.subscriptionStatus === 'active' 
+                    ? `Active until ${new Date(dashboardData.plan.subscriptionEndDate).toLocaleDateString()}`
+                    : 'Free plan with limited features'
+                  }
+                </p>
+              </div>
+              {dashboardData.plan.type === 'FREE' && (
+                <button 
+                  onClick={() => navigate('/pricing')}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
+                >
+                  Upgrade Plan
+                </button>
+              )}
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Workflows Usage */}
+              <div className="bg-white rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Workflows</span>
+                  <span className="text-sm text-gray-500">
+                    {dashboardData.plan.workflowsUsed} / {dashboardData.plan.workflowsLimit === 999999 ? '∞' : dashboardData.plan.workflowsLimit}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      dashboardData.plan.workflowsUsed >= dashboardData.plan.workflowsLimit 
+                        ? 'bg-red-500' 
+                        : dashboardData.plan.workflowsUsed / dashboardData.plan.workflowsLimit > 0.8
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                    }`}
+                    style={{ 
+                      width: `${Math.min(100, (dashboardData.plan.workflowsUsed / dashboardData.plan.workflowsLimit) * 100)}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* API Calls Usage */}
+              <div className="bg-white rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">API Calls</span>
+                  <span className="text-sm text-gray-500">
+                    {dashboardData.plan.apiCallsUsed} / {dashboardData.plan.apiCallsLimit === 999999 ? '∞' : dashboardData.plan.apiCallsLimit}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      dashboardData.plan.apiCallsUsed >= dashboardData.plan.apiCallsLimit 
+                        ? 'bg-red-500' 
+                        : dashboardData.plan.apiCallsUsed / dashboardData.plan.apiCallsLimit > 0.8
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                    }`}
+                    style={{ 
+                      width: `${Math.min(100, (dashboardData.plan.apiCallsUsed / dashboardData.plan.apiCallsLimit) * 100)}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Content - Now balanced 1:1 instead of 2:1 */}
         <div className="grid lg:grid-cols-2 gap-6">

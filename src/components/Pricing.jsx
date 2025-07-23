@@ -15,19 +15,19 @@ const Pricing = () => {
 
   const plans = [
     {
-      id: "starter",
-      name: "Starter",
+      id: "free",
+      name: "Free",
       monthlyPrice: "$0",
       yearlyPrice: "$0",
       period: "forever",
-      description: "Perfect for individuals getting started with automation workflows.",
+      description: "Perfect for individuals getting started with workflow automation.",
       features: [
-        "Up to 100 API calls per month",
-        "5 automation workflows", 
-        "Basic integrations (10+ apps)",
+        "2 workflows maximum",
+        "100 API calls per month",
+        "Basic integrations (Gmail, Slack, Sheets)",
         "Email notifications",
         "Community support",
-        "Standard templates"
+        "Basic templates"
       ],
       buttonText: "Get Started Free",
       buttonStyle: "bg-white border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50",
@@ -35,45 +35,48 @@ const Pricing = () => {
       highlight: false
     },
     {
-      id: "professional",
-      name: "Professional", 
+      id: "pro",
+      name: "Pro", 
       monthlyPrice: "$20",
-      yearlyPrice: "$16",
+      yearlyPrice: "$200",
       period: "per month",
       description: "Advanced automation for growing teams and businesses.",
       features: [
-        "Up to 10,000 API calls per month",
-        "Unlimited automation workflows", 
-        "Premium integrations (100+ apps)",
+        "50 workflows maximum",
+        "10,000 API calls per month",
+        "All integrations (100+ apps)",
         "Real-time monitoring & alerts",
         "Priority email support",
         "Custom workflow templates",
         "Advanced analytics dashboard",
-        "Webhook support"
+        "Webhook support",
+        "1 month duration"
       ],
-      buttonText: "Get premium",
+      buttonText: "Get Pro",
       buttonStyle: "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl",
       popular: true,
       highlight: true
     },
     {
-      id: "enterprise",
-      name: "Enterprise",
+      id: "premium",
+      name: "Premium",
       monthlyPrice: "$30",
-      yearlyPrice: "$25", 
+      yearlyPrice: "$300", 
       period: "per month",
       description: "Complete automation solution for large-scale operations.",
       features: [
+        "Unlimited workflows",
         "Unlimited API calls",
-        "Advanced workflow automation",
         "All premium integrations + custom APIs",
         "24/7 dedicated support",
         "Custom onboarding & training",
         "Advanced security & compliance",
         "White-label options",
-        "SLA guarantees"
+        "SLA guarantees",
+        "1 month duration",
+        "Priority feature requests"
       ],
-      buttonText: "Get Pro",
+      buttonText: "Get Premium",
       buttonStyle: "bg-white border-2 border-purple-300 text-purple-700 hover:border-purple-400 hover:bg-purple-50",
       popular: false,
       highlight: false
@@ -127,14 +130,13 @@ const Pricing = () => {
   const handleSubscribe = async (plan) => {
     if (!user) {
       // If user is not logged in, redirect to login or show login modal
-      // For now, we'll just alert
       alert("Please login to subscribe to a plan")
       return
     }
 
-    if (plan.id === 'enterprise') {
-      // For enterprise plan, redirect to contact sales or show contact modal
-      window.location.href = '/contact-us'
+    if (plan.id === 'free') {
+      // Free plan - no payment needed, just update user plan
+      alert("You're already on the free plan!")
       return
     }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -29,121 +29,60 @@ const Templates = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const templates = [
-    {
-      id: 1,
-      name: "Customer Onboarding Automation",
-      description: "Automatically welcome new customers with personalized emails and setup their accounts",
-      category: "Customer Success",
-      type: "popular",
-      apps: ["Typeform", "Gmail", "Slack", "Google Sheets"],
-      icon: <Users className="w-6 h-6" />,
-      color: "bg-blue-100 text-blue-600",
-      rating: 4.8,
-      uses: 1234,
-      time: "5 min",
-      complexity: "Beginner"
-    },
-    {
-      id: 2,
-      name: "Lead Qualification Pipeline",
-      description: "Score leads from forms and route them to the right sales team automatically",
-      category: "Sales",
-      type: "popular",
-      apps: ["Typeform", "HubSpot", "Slack"],
-      icon: <Database className="w-6 h-6" />,
-      color: "bg-green-100 text-green-600",
-      rating: 4.9,
-      uses: 987,
-      time: "10 min",
-      complexity: "Intermediate"
-    },
-    {
-      id: 3,
-      name: "Social Media Monitoring",
-      description: "Monitor brand mentions across social platforms and get instant notifications",
-      category: "Marketing",
-      type: "trending",
-      apps: ["Twitter", "Slack", "Gmail"],
-      icon: <Globe className="w-6 h-6" />,
-      color: "bg-purple-100 text-purple-600",
-      rating: 4.7,
-      uses: 543,
-      time: "3 min",
-      complexity: "Beginner"
-    },
-    {
-      id: 4,
-      name: "Invoice Processing Workflow",
-      description: "Automatically process invoices from email and organize them in your accounting system",
-      category: "Finance",
-      type: "new",
-      apps: ["Gmail", "Google Drive", "QuickBooks"],
-      icon: <CreditCard className="w-6 h-6" />,
-      color: "bg-orange-100 text-orange-600",
-      rating: 4.6,
-      uses: 321,
-      time: "15 min",
-      complexity: "Advanced"
-    },
-    {
-      id: 5,
-      name: "Meeting Scheduler",
-      description: "Automatically schedule meetings when someone books a call through your form",
-      category: "Productivity",
-      type: "popular",
-      apps: ["Calendly", "Gmail", "Zoom"],
-      icon: <Calendar className="w-6 h-6" />,
-      color: "bg-teal-100 text-teal-600",
-      rating: 4.8,
-      uses: 876,
-      time: "8 min",
-      complexity: "Intermediate"
-    },
-    {
-      id: 6,
-      name: "Support Ticket Router",
-      description: "Route support tickets to the right team based on priority and category",
-      category: "Support",
-      type: "trending",
-      apps: ["Zendesk", "Slack", "Gmail"],
-      icon: <MessageSquare className="w-6 h-6" />,
-      color: "bg-red-100 text-red-600",
-      rating: 4.5,
-      uses: 432,
-      time: "12 min",
-      complexity: "Intermediate"
-    },
-    {
-      id: 7,
-      name: "Content Publishing Pipeline",
-      description: "Automatically publish blog posts to multiple platforms and notify your team",
-      category: "Content",
-      type: "new",
-      apps: ["WordPress", "Twitter", "LinkedIn", "Slack"],
-      icon: <FileText className="w-6 h-6" />,
-      color: "bg-indigo-100 text-indigo-600",
-      rating: 4.4,
-      uses: 234,
-      time: "20 min",
-      complexity: "Advanced"
-    },
-    {
-      id: 8,
-      name: "Email Drip Campaign",
-      description: "Send personalized follow-up emails based on customer behavior and triggers",
-      category: "Marketing",
-      type: "popular",
-      apps: ["Gmail", "Google Sheets", "Mailchimp"],
-      icon: <Mail className="w-6 h-6" />,
-      color: "bg-pink-100 text-pink-600",
-      rating: 4.7,
-      uses: 654,
-      time: "18 min",
-      complexity: "Intermediate"
-    }
-  ];
+  // Fetch templates from backend
+  useEffect(() => {
+    const mockTemplates = [
+      {
+        id: 1,
+        name: "Customer Onboarding Automation",
+        description: "Automatically welcome new customers with personalized emails and setup their accounts",
+        category: "Customer Success",
+        type: "popular",
+        apps: ["Typeform", "Gmail", "Slack", "Google Sheets"],
+        icon: <Users className="w-6 h-6" />,
+        color: "bg-blue-100 text-blue-600",
+        rating: 4.8,
+        uses: 1234,
+        time: "5 min",
+        complexity: "Beginner"
+      },
+      {
+        id: 2,
+        name: "Lead Qualification Pipeline",
+        description: "Score leads from forms and route them to the right sales team automatically",
+        category: "Sales",
+        type: "popular",
+        apps: ["Typeform", "HubSpot", "Slack"],
+        icon: <Database className="w-6 h-6" />,
+        color: "bg-green-100 text-green-600",
+        rating: 4.9,
+        uses: 987,
+        time: "10 min",
+        complexity: "Intermediate"
+      }
+    ];
+
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch('/api/templates');
+        const data = await response.json();
+        if (data.success) {
+          setTemplates(data.templates);
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        // Fallback to mock data on error
+        setTemplates(mockTemplates);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const categories = [
     'all', 'Customer Success', 'Sales', 'Marketing', 'Finance', 
@@ -182,9 +121,35 @@ const Templates = () => {
 
   const featuredTemplates = templates.filter(t => t.type === 'popular').slice(0, 3);
 
-  const handleUseTemplate = (template) => {
-    // Navigate to workflow builder with template pre-loaded
-    navigate(`/workflows/create?template=${template.id}`);
+  const handleUseTemplate = async (template) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      // Create workflow from template
+      const response = await fetch('/api/templates/duplicate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify({ templateId: template.id })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Navigate to the new workflow
+        navigate(`/workflows/${data.workflow.id}`);
+      } else {
+        console.error('Error creating workflow from template:', data.error);
+      }
+    } catch (error) {
+      console.error('Error using template:', error);
+      // Fallback to workflow builder with template info
+      navigate(`/workflows/create?template=${template.id}`);
+    }
   };
 
   return (
@@ -293,8 +258,32 @@ const Templates = () => {
         </div>
 
         {/* Templates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template, index) => (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-2xl"></div>
+                  <div className="w-16 h-6 bg-gray-200 rounded-full"></div>
+                </div>
+                <div className="space-y-2 mb-4">
+                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                  </div>
+                  <div className="h-10 bg-gray-200 rounded-lg w-full"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTemplates.map((template, index) => (
             <motion.div
               key={template.id}
               initial={{ opacity: 0, y: 20 }}
@@ -384,10 +373,11 @@ const Templates = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Empty State */}
-        {filteredTemplates.length === 0 && (
+        {!loading && filteredTemplates.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-gray-400" />

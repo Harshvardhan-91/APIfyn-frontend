@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Plus, 
@@ -20,10 +20,44 @@ import { useNavigate } from 'react-router-dom';
 const Workflows = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [workflows, setWorkflows] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const workflows = [
+  // Fetch workflows from backend
+  useEffect(() => {
+    const fetchWorkflows = async () => {
+      if (!user?.idToken) return;
+      
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
+          headers: {
+            'Authorization': `Bearer ${user.idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setWorkflows(result.workflows);
+          }
+        } else {
+          console.error('Failed to fetch workflows:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching workflows:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkflows();
+  }, [user]);
+
+  // Use actual workflows if available, otherwise show empty state or mock data
+  const mockWorkflows = [
     {
       id: 1,
       name: "Customer Onboarding",
@@ -43,28 +77,10 @@ const Workflows = () => {
       lastRun: "5 minutes ago",
       apps: ["Typeform", "Slack", "HubSpot"],
       created: "5 days ago"
-    },
-    {
-      id: 3,
-      name: "Social Media Monitoring",
-      description: "Track mentions across social platforms",
-      status: "paused",
-      executions: 234,
-      lastRun: "1 hour ago",
-      apps: ["Twitter", "Slack", "Notion"],
-      created: "1 week ago"
-    },
-    {
-      id: 4,
-      name: "Invoice Processing",
-      description: "Process and organize invoices automatically",
-      status: "failed",
-      executions: 45,
-      lastRun: "3 hours ago",
-      apps: ["Gmail", "Google Drive", "QuickBooks"],
-      created: "3 days ago"
     }
   ];
+  
+  const displayWorkflows = workflows.length > 0 ? workflows : mockWorkflows;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -84,12 +100,23 @@ const Workflows = () => {
     }
   };
 
-  const filteredWorkflows = workflows.filter(workflow => {
+  const filteredWorkflows = displayWorkflows.filter(workflow => {
     const matchesSearch = workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          workflow.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || workflow.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading workflows...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">

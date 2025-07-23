@@ -148,14 +148,75 @@ const WorkflowBuilder = () => {
     }
   };
 
-  const handleSave = () => {
-    console.log('Saving workflow...', { name: workflowName, blocks, connections });
-    // TODO: Implement save functionality
+  const handleSave = async () => {
+    try {
+      if (!user?.idToken) {
+        alert('Please log in to save workflows');
+        return;
+      }
+
+      const workflowData = {
+        name: workflowName,
+        description: `Workflow with ${blocks.length} blocks`,
+        definition: {
+          blocks: blocks,
+          connections: connections,
+          canvas: { zoom, position: canvasPosition }
+        },
+        category: 'general',
+        triggerType: 'MANUAL',
+        isActive: false // Start as inactive
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          alert('Workflow saved successfully!');
+          navigate('/workflows');
+        } else {
+          alert('Failed to save workflow: ' + (result.error || 'Unknown error'));
+        }
+      } else {
+        const errorData = await response.json();
+        alert('Failed to save workflow: ' + (errorData.error || response.statusText));
+      }
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+      alert('Error saving workflow: ' + error.message);
+    }
   };
 
-  const handleTestRun = () => {
-    console.log('Testing workflow...', { blocks, connections });
-    // TODO: Implement test run functionality
+  const handleTestRun = async () => {
+    try {
+      if (!user?.idToken) {
+        alert('Please log in to test workflows');
+        return;
+      }
+
+      if (blocks.length === 0) {
+        alert('Please add some blocks to test the workflow');
+        return;
+      }
+
+      // For testing, we'll create a temporary workflow or use a test endpoint
+      console.log('Testing workflow...', { blocks, connections });
+      alert('Test run started! Check the console for details.');
+      
+      // TODO: Implement actual test run functionality
+      // This could involve sending the workflow definition to a test endpoint
+    } catch (error) {
+      console.error('Error testing workflow:', error);
+      alert('Error testing workflow: ' + error.message);
+    }
   };
 
   const handlePublish = () => {

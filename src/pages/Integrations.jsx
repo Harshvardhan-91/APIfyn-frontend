@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -26,6 +26,48 @@ const Integrations = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [connectedIntegrations, setConnectedIntegrations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch connected integrations from backend
+  useEffect(() => {
+    const fetchIntegrations = async () => {
+      if (!user?.idToken) return;
+      
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration`, {
+          headers: {
+            'Authorization': `Bearer ${user.idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setConnectedIntegrations(result.integrations || []);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching integrations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIntegrations();
+  }, [user]);
+
+  const handleConnect = async (integrationName) => {
+    try {
+      alert(`Connecting to ${integrationName}... This will redirect to OAuth flow.`);
+      // TODO: Implement OAuth flow for each integration
+      console.log(`Connecting to ${integrationName}`);
+    } catch (error) {
+      console.error('Error connecting integration:', error);
+      alert('Failed to connect integration');
+    }
+  };
 
   const integrations = [
     {
@@ -336,6 +378,7 @@ const Integrations = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={() => handleConnect(integration.name.toLowerCase())}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                     >
                       Connect

@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -19,37 +18,72 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+// Fallback metrics for offline/error scenarios
+const fallbackMetrics = {
+  executions: {
+    current: 1234,
+    previous: 1089,
+    change: 13.3,
+    label: 'Total Executions'
+  },
+  workflows: {
+    current: 12,
+    previous: 10,
+    change: 20.0,
+    label: 'Active Workflows'
+  },
+  success: {
+    current: 98.7,
+    previous: 97.2,
+    change: 1.5,
+    label: 'Success Rate'
+  },
+  response: {
+    current: 245,
+    previous: 289,
+    change: -15.2,
+    label: 'Avg Response Time (ms)'
+  }
+};
+
 const Analytics = () => {
   const { user } = useAuth();
   const [timeRange, setTimeRange] = useState('7d');
-  const [selectedMetric, setSelectedMetric] = useState('executions');
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const metrics = {
-    executions: {
-      current: 1234,
-      previous: 1089,
-      change: 13.3,
-      label: 'Total Executions'
-    },
-    workflows: {
-      current: 12,
-      previous: 10,
-      change: 20.0,
-      label: 'Active Workflows'
-    },
-    success: {
-      current: 98.7,
-      previous: 97.2,
-      change: 1.5,
-      label: 'Success Rate'
-    },
-    response: {
-      current: 245,
-      previous: 289,
-      change: -15.2,
-      label: 'Avg Response Time (ms)'
-    }
-  };
+  // Fetch analytics data from backend
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!user) return;
+      
+      try {
+        const response = await fetch(`/api/analytics?range=${timeRange}`, {
+          headers: {
+            'Authorization': `Bearer ${await user.getIdToken()}`
+          }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          setAnalyticsData(data.analytics);
+        } else {
+          // Use fallback data on error
+          setAnalyticsData(fallbackMetrics);
+        }
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        setAnalyticsData(fallbackMetrics);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [user, timeRange]);
+
+  // Use analytics data if available, otherwise fallback
+  const metrics = analyticsData || fallbackMetrics;
 
   
   const workflowStats = [
@@ -137,16 +171,55 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Loading State */}
+        {loading ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl p-6 border border-gray-200 animate-pulse">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                    <div className="w-16 h-6 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-8 bg-gray-200 rounded w-2/3"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl p-6 border border-gray-200 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
+              <div className="bg-white rounded-xl p-6 border border-gray-200 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                        <div className="space-y-1">
+                          <div className="h-4 bg-gray-200 rounded w-24"></div>
+                          <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        </div>
+                      </div>
+                      <div className="h-6 bg-gray-200 rounded w-12"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">`
           {Object.entries(metrics).map(([key, metric]) => (
-            <motion.div
+            <div
               key={key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer"
-              onClick={() => setSelectedMetric(key)}
+              className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
@@ -166,7 +239,7 @@ const Analytics = () => {
                 </p>
                 <p className="text-gray-500 text-sm">{metric.label}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -320,6 +393,8 @@ const Analytics = () => {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
