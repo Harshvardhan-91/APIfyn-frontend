@@ -56,31 +56,31 @@ const Workflows = () => {
     fetchWorkflows();
   }, [user]);
 
-  // Use actual workflows if available, otherwise show empty state or mock data
-  const mockWorkflows = [
-    {
-      id: 1,
-      name: "Customer Onboarding",
-      description: "Automatically onboard new customers from Typeform to CRM",
-      status: "active",
-      executions: 156,
-      lastRun: "2 minutes ago",
-      apps: ["Typeform", "Google Sheets", "Gmail"],
-      created: "2 days ago"
-    },
-    {
-      id: 2,
-      name: "Lead Qualification",
-      description: "Score and route leads based on form responses",
-      status: "active",
-      executions: 89,
-      lastRun: "5 minutes ago",
-      apps: ["Typeform", "Slack", "HubSpot"],
-      created: "5 days ago"
-    }
-  ];
+  // Process workflows to ensure all required fields exist
+  const processedWorkflows = workflows.map(workflow => ({
+    ...workflow,
+    status: workflow.isActive ? 'active' : 'paused',
+    executions: workflow.totalRuns || 0,
+    lastRun: workflow.lastExecutedAt ? new Date(workflow.lastExecutedAt).toLocaleDateString() : 'Never',
+    description: workflow.description || 'No description available',
+    apps: workflow.definition?.blocks ? 
+      Array.from(new Set(workflow.definition.blocks.map(block => {
+        // Extract app names from block types
+        if (block.type?.includes('gmail')) return 'Gmail';
+        if (block.type?.includes('slack')) return 'Slack';
+        if (block.type?.includes('discord')) return 'Discord';
+        if (block.type?.includes('typeform')) return 'Typeform';
+        if (block.type?.includes('sheets')) return 'Google Sheets';
+        if (block.type?.includes('notion')) return 'Notion';
+        if (block.type?.includes('webhook')) return 'Webhook';
+        if (block.type?.includes('stripe')) return 'Stripe';
+        if (block.type?.includes('calendar')) return 'Calendar';
+        return 'Custom';
+      }))) : [],
+    created: workflow.createdAt ? new Date(workflow.createdAt).toLocaleDateString() : 'Unknown'
+  }));
   
-  const displayWorkflows = workflows.length > 0 ? workflows : mockWorkflows;
+  const displayWorkflows = processedWorkflows;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -218,7 +218,7 @@ const Workflows = () => {
               {/* Connected Apps */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex -space-x-2">
-                  {workflow.apps.slice(0, 3).map((app, i) => (
+                  {(workflow.apps || []).slice(0, 3).map((app, i) => (
                     <div
                       key={i}
                       className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-2 border-white flex items-center justify-center"
@@ -226,13 +226,13 @@ const Workflows = () => {
                       <span className="text-white text-xs font-bold">{app.charAt(0)}</span>
                     </div>
                   ))}
-                  {workflow.apps.length > 3 && (
+                  {(workflow.apps || []).length > 3 && (
                     <div className="w-6 h-6 bg-gray-300 rounded-full border-2 border-white flex items-center justify-center">
-                      <span className="text-gray-600 text-xs">+{workflow.apps.length - 3}</span>
+                      <span className="text-gray-600 text-xs">+{(workflow.apps || []).length - 3}</span>
                     </div>
                   )}
                 </div>
-                <span className="text-sm text-gray-500">{workflow.apps.length} apps</span>
+                <span className="text-sm text-gray-500">{(workflow.apps || []).length} apps</span>
               </div>
 
               {/* Footer */}

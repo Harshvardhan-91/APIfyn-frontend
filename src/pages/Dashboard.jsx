@@ -36,46 +36,13 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState({
-    totalWorkflows: 12,
-    executionsToday: 156,
-    connectedApps: 6,
-    thisWeek: 1234,
-    recentActivity: [
-      {
-        id: 1,
-        name: "Customer Onboarding Flow",
-        type: "workflow_execution",
-        status: "completed",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        duration: "2.3s"
-      },
-      {
-        id: 2,
-        name: "Slack Integration",
-        type: "app_connection",
-        status: "connected",
-        timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        duration: null
-      },
-      {
-        id: 3,
-        name: "Email Campaign Trigger",
-        type: "workflow_execution",
-        status: "completed",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-        duration: "1.8s"
-      },
-      {
-        id: 4,
-        name: "Data Sync Process",
-        type: "workflow_execution",
-        status: "failed",
-        timestamp: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
-        duration: "0.5s"
-      }
-    ]
+    totalWorkflows: 0,
+    executionsToday: 0,
+    connectedApps: 0,
+    thisWeek: 0,
+    recentActivity: []
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {

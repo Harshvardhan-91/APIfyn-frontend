@@ -69,118 +69,115 @@ const Integrations = () => {
     }
   };
 
-  const integrations = [
+  // Available integrations (these could come from backend too)
+  const availableIntegrations = [
     {
-      id: 1,
+      id: 'gmail',
       name: "Gmail",
       description: "Send and receive emails automatically",
       icon: <Mail className="w-6 h-6" />,
       category: "Email",
-      connected: true,
       popular: true,
       rating: 4.8,
       color: "bg-red-100 text-red-600"
     },
     {
-      id: 2,
+      id: 'slack',
       name: "Slack",
       description: "Send messages and notifications to channels",
       icon: <MessageSquare className="w-6 h-6" />,
       category: "Communication",
-      connected: true,
       popular: true,
       rating: 4.9,
       color: "bg-purple-100 text-purple-600"
     },
     {
-      id: 3,
+      id: 'google-sheets',
       name: "Google Sheets",
       description: "Create, update, and manage spreadsheets",
       icon: <FileText className="w-6 h-6" />,
       category: "Productivity",
-      connected: true,
       popular: true,
       rating: 4.7,
       color: "bg-green-100 text-green-600"
     },
     {
-      id: 4,
+      id: 'typeform',
       name: "Typeform",
       description: "Collect and process form submissions",
       icon: <FileText className="w-6 h-6" />,
       category: "Forms",
-      connected: false,
       popular: true,
       rating: 4.6,
       color: "bg-blue-100 text-blue-600"
     },
     {
-      id: 5,
+      id: 'hubspot',
       name: "HubSpot",
       description: "Manage contacts, deals, and marketing campaigns",
       icon: <Database className="w-6 h-6" />,
       category: "CRM",
-      connected: false,
       popular: true,
       rating: 4.5,
       color: "bg-orange-100 text-orange-600"
     },
     {
-      id: 6,
+      id: 'stripe',
       name: "Stripe",
       description: "Process payments and manage subscriptions",
       icon: <CreditCard className="w-6 h-6" />,
       category: "Payment",
-      connected: false,
       popular: true,
       rating: 4.8,
       color: "bg-indigo-100 text-indigo-600"
     },
     {
-      id: 7,
+      id: 'notion',
       name: "Notion",
       description: "Create and update database entries",
       icon: <Database className="w-6 h-6" />,
       category: "Productivity",
-      connected: false,
       popular: false,
       rating: 4.4,
       color: "bg-gray-100 text-gray-600"
     },
     {
-      id: 8,
+      id: 'twitter',
       name: "Twitter",
       description: "Post tweets and monitor mentions",
       icon: <Globe className="w-6 h-6" />,
       category: "Social Media",
-      connected: false,
       popular: false,
       rating: 4.3,
       color: "bg-sky-100 text-sky-600"
     },
     {
-      id: 9,
+      id: 'google-drive',
       name: "Google Drive",
       description: "Upload, organize, and share files",
       icon: <Cloud className="w-6 h-6" />,
       category: "Storage",
-      connected: false,
       popular: false,
       rating: 4.6,
       color: "bg-yellow-100 text-yellow-600"
     },
     {
-      id: 10,
+      id: 'calendly',
       name: "Calendly",
       description: "Schedule meetings and appointments",
       icon: <Calendar className="w-6 h-6" />,
       category: "Scheduling",
-      connected: false,
       popular: false,
       rating: 4.7,
       color: "bg-teal-100 text-teal-600"
     }
   ];
+
+  // Merge available integrations with connected status
+  const integrations = availableIntegrations.map(integration => ({
+    ...integration,
+    connected: connectedIntegrations.some(conn => conn.type === integration.id || conn.name === integration.name)
+  }));
 
   const categories = [
     'all', 'Email', 'Communication', 'Productivity', 'Forms', 'CRM', 

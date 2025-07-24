@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Save, 
@@ -40,8 +40,8 @@ const WorkflowBuilder = () => {
   const canvasRef = useRef(null);
   const svgRef = useRef(null);
   
-  const [workflowName, setWorkflowName] = useState('');
-  const [isEditing, setIsEditing] = useState(true);
+  const [workflowName, setWorkflowName] = useState('Untitled Workflow');
+  const [isEditing, setIsEditing] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [canvasPosition] = useState({ x: 0, y: 0 });
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -65,26 +65,6 @@ const WorkflowBuilder = () => {
   // Block dragging
   const [isDraggingBlock, setIsDraggingBlock] = useState(false);
   const [draggedBlockId, setDraggedBlockId] = useState(null);
-
-  // Toast notifications
-  const [toasts, setToasts] = useState([]);
-
-  // Toast function
-  const showToast = useCallback((message, type = 'info') => {
-    const id = Date.now();
-    const newToast = { id, message, type };
-    setToasts(prev => [...prev, newToast]);
-    
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 4000);
-  }, []);
-
-  // Remove toast function
-  const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
 
   // Block Library
   const blockLibrary = {
@@ -117,43 +97,18 @@ const WorkflowBuilder = () => {
     ]
   };
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     try {
       if (!user?.idToken) {
-        showToast('Please log in to save workflows', 'error');
+        alert('Please log in to save workflows');
         return;
       }
-
-      if (!workflowName.trim()) {
-        showToast('Please enter a workflow name before saving', 'warning');
-        setIsEditing(true);
-        return;
-      }
-
-      if (blocks.length === 0) {
-        showToast('Please add at least one block to your workflow', 'warning');
-        return;
-      }
-
-      // Clean the blocks data for JSON serialization
-      const cleanBlocks = blocks.map(block => ({
-        id: block.id,
-        type: block.type,
-        name: block.name,
-        description: block.description,
-        position: block.position,
-        config: block.config || {},
-        status: block.status,
-        // Remove the JSX icon and color classes that can't be serialized
-        iconType: block.type, // Keep track of type for icon recreation
-        colorClass: block.color
-      }));
 
       const workflowData = {
         name: workflowName,
         description: `Workflow with ${blocks.length} blocks and ${connections.length} connections`,
         definition: {
-          blocks: cleanBlocks,
+          blocks: blocks,
           connections: connections,
           canvas: { zoom, position: canvasPosition }
         },
@@ -161,8 +116,6 @@ const WorkflowBuilder = () => {
         triggerType: 'MANUAL',
         isActive: false
       };
-
-      showToast('Saving workflow...', 'info');
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
         method: 'POST',
@@ -176,28 +129,28 @@ const WorkflowBuilder = () => {
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          showToast('Workflow saved successfully! 🎉', 'success');
-          setTimeout(() => navigate('/workflows'), 1500);
+          alert('Workflow saved successfully!');
+          navigate('/workflows');
         } else {
-          showToast('Failed to save workflow: ' + (result.error || 'Unknown error'), 'error');
+          alert('Failed to save workflow: ' + (result.error || 'Unknown error'));
         }
       } else {
         const errorData = await response.json();
-        showToast('Failed to save workflow: ' + (errorData.error || response.statusText), 'error');
+        alert('Failed to save workflow: ' + (errorData.error || response.statusText));
       }
     } catch (error) {
       console.error('Error saving workflow:', error);
-      showToast('Error saving workflow: ' + error.message, 'error');
+      alert('Error saving workflow: ' + error.message);
     }
-  }, [user, workflowName, blocks, connections, zoom, canvasPosition, navigate, showToast]);
+  };
 
-  const handleBlockDelete = useCallback((blockId) => {
+  const handleBlockDelete = (blockId) => {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
     setConnections(prev => prev.filter(conn => conn.from !== blockId && conn.to !== blockId));
     if (selectedBlock?.id === blockId) {
       setSelectedBlock(null);
     }
-  }, [selectedBlock]);
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -233,7 +186,7 @@ const WorkflowBuilder = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedBlock, handleSave, handleBlockDelete]);
+  }, [selectedBlock]);
 
   // Mouse tracking for temporary connections
   useEffect(() => {
@@ -399,51 +352,41 @@ const WorkflowBuilder = () => {
   const handleTestRun = async () => {
     try {
       if (!user?.idToken) {
-        showToast('Please log in to test workflows', 'error');
+        alert('Please log in to test workflows');
         return;
       }
 
       if (blocks.length === 0) {
-        showToast('Please add some blocks to test the workflow', 'warning');
+        alert('Please add some blocks to test the workflow');
         return;
       }
 
       if (connections.length === 0 && blocks.length > 1) {
-        showToast('Please connect your blocks to create a workflow', 'warning');
+        alert('Please connect your blocks to create a workflow');
         return;
       }
 
-      showToast('Test run started! 🧪', 'info');
       console.log('Testing workflow...', { blocks, connections });
-      
-      // Simulate test run
-      setTimeout(() => {
-        showToast('Test run completed successfully! ✅', 'success');
-      }, 2000);
+      alert('Test run started! Check the console for details.');
     } catch (error) {
       console.error('Error testing workflow:', error);
-      showToast('Error testing workflow: ' + error.message, 'error');
+      alert('Error testing workflow: ' + error.message);
     }
   };
 
   const handlePublish = () => {
     if (blocks.length === 0) {
-      showToast('Please add blocks to your workflow before publishing', 'warning');
+      alert('Please add blocks to your workflow before publishing');
       return;
     }
     
     if (connections.length === 0 && blocks.length > 1) {
-      showToast('Please connect your blocks before publishing', 'warning');
+      alert('Please connect your blocks before publishing');
       return;
     }
     
-    showToast('Publishing workflow...', 'info');
     console.log('Publishing workflow...', { name: workflowName, blocks, connections });
-    
-    // Simulate publish
-    setTimeout(() => {
-      showToast('Workflow published successfully! 🚀', 'success');
-    }, 1500);
+    alert('Workflow published successfully!');
   };
 
   const filteredBlocks = Object.entries(blockLibrary).reduce((acc, [category, blocks]) => {
@@ -457,9 +400,9 @@ const WorkflowBuilder = () => {
   }, {});
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gray-50 flex flex-col">
       {/* Top Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/workflows')}
@@ -475,18 +418,15 @@ const WorkflowBuilder = () => {
                 onChange={(e) => setWorkflowName(e.target.value)}
                 onBlur={() => setIsEditing(false)}
                 onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
-                placeholder="Enter workflow name..."
-                className="text-lg font-semibold bg-transparent border-2 border-blue-500 outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
+                className="text-xl font-semibold bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 rounded px-2"
                 autoFocus
               />
             ) : (
               <h1 
-                className={`text-lg font-semibold cursor-pointer hover:bg-gray-100 px-2 py-1 rounded ${
-                  !workflowName ? 'text-gray-400' : ''
-                }`}
+                className="text-xl font-semibold cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
                 onClick={() => setIsEditing(true)}
               >
-                {workflowName || 'Untitled Workflow - Click to name'}
+                {workflowName}
               </h1>
             )}
             <button
@@ -500,18 +440,18 @@ const WorkflowBuilder = () => {
 
         <div className="flex items-center gap-2">
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Undo (Ctrl+Z)">
-            <Undo className="w-4 h-4" />
+            <Undo className="w-5 h-5" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Redo (Ctrl+Y)">
-            <Redo className="w-4 h-4" />
+            <Redo className="w-5 h-5" />
           </button>
-          <div className="w-px h-5 bg-gray-300 mx-2"></div>
+          <div className="w-px h-6 bg-gray-300 mx-2"></div>
           <button 
             onClick={() => setZoom(prev => Math.min(prev + 0.1, 2))}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title="Zoom In"
           >
-            <ZoomIn className="w-4 h-4" />
+            <ZoomIn className="w-5 h-5" />
           </button>
           <span className="text-sm text-gray-600 px-2 min-w-[50px] text-center">{Math.round(zoom * 100)}%</span>
           <button 
@@ -519,19 +459,19 @@ const WorkflowBuilder = () => {
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title="Zoom Out"
           >
-            <ZoomOut className="w-4 h-4" />
+            <ZoomOut className="w-5 h-5" />
           </button>
           <button 
             onClick={() => setZoom(1)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title="Reset Zoom"
           >
-            <Maximize className="w-4 h-4" />
+            <Maximize className="w-5 h-5" />
           </button>
-          <div className="w-px h-5 bg-gray-300 mx-2"></div>
+          <div className="w-px h-6 bg-gray-300 mx-2"></div>
           <button
             onClick={handleTestRun}
-            className="bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 text-sm"
+            className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
             title="Test Run (Requires connected blocks)"
           >
             <TestTube className="w-4 h-4" />
@@ -539,7 +479,7 @@ const WorkflowBuilder = () => {
           </button>
           <button
             onClick={handleSave}
-            className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm"
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
             title="Save (Ctrl+S)"
           >
             <Save className="w-4 h-4" />
@@ -547,7 +487,7 @@ const WorkflowBuilder = () => {
           </button>
           <button
             onClick={handlePublish}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 text-sm"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2"
             title="Publish Workflow"
           >
             <Rocket className="w-4 h-4" />
@@ -556,10 +496,10 @@ const WorkflowBuilder = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex">
         {/* Left Sidebar - Block Library */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-          <div className="p-4 border-b border-gray-200 flex-shrink-0">
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          <div className="p-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Block Library</h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -573,7 +513,7 @@ const WorkflowBuilder = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto">
             {Object.entries(filteredBlocks).map(([category, blocks]) => (
               <div key={category} className="border-b border-gray-100">
                 <button
@@ -629,10 +569,10 @@ const WorkflowBuilder = () => {
         </div>
 
         {/* Main Canvas */}
-        <div className="flex-1 relative overflow-hidden min-h-0">
+        <div className="flex-1 relative overflow-hidden">
           <div
             ref={canvasRef}
-            className="w-full h-full bg-gray-50 relative overflow-hidden"
+            className="w-full h-full bg-gray-50 relative"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             style={{
@@ -933,24 +873,13 @@ const WorkflowBuilder = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Gmail Account
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select Gmail Account</option>
-                        <option value="primary">Primary Gmail Account</option>
-                        <option value="custom">Connect New Account</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         To Email
                       </label>
                       <input
                         type="email"
-                        placeholder="recipient@example.com or {{trigger.email}}"
+                        placeholder="recipient@example.com"
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Use {`{trigger.fieldname}`} for dynamic data</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -958,7 +887,7 @@ const WorkflowBuilder = () => {
                       </label>
                       <input
                         type="text"
-                        placeholder="Welcome {{trigger.name}}!"
+                        placeholder="Email subject"
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -968,87 +897,7 @@ const WorkflowBuilder = () => {
                       </label>
                       <textarea
                         rows="4"
-                        placeholder="Hi {{trigger.name}}, welcome to our platform! Your email: {{trigger.email}}"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {selectedBlock.type === 'discord-send' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Discord Webhook URL
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://discord.com/api/webhooks/your-webhook-url"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Get this from Discord Server Settings → Integrations → Webhooks</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Channel Name (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="#new-customers"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message
-                      </label>
-                      <textarea
-                        rows="4"
-                        placeholder="🎉 New customer: {{trigger.name}} ({{trigger.email}}) just signed up!"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Bot Username (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="APIfyn Bot"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {selectedBlock.type === 'slack-send' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Slack Workspace
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select Workspace</option>
-                        <option value="connect">Connect Slack Workspace</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Channel
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="#general or @username"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message
-                      </label>
-                      <textarea
-                        rows="4"
-                        placeholder="New lead: {{trigger.name}} - {{trigger.email}}"
+                        placeholder="Email message"
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       />
                     </div>
@@ -1056,177 +905,50 @@ const WorkflowBuilder = () => {
                 )}
 
                 {selectedBlock.type === 'typeform-trigger' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Typeform Form
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select a form</option>
-                        <option value="connect">Connect Typeform Account</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Form ID (Alternative)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="abc123def"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Find this in your Typeform URL: typeform.com/to/<strong>abc123def</strong></p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Webhook URL (Generated)
-                      </label>
-                      <div className="bg-gray-50 p-3 rounded-lg border">
-                        <code className="text-sm text-gray-600 break-all">
-                          https://api.apifyn.com/webhooks/typeform/{selectedBlock.id}
-                        </code>
-                        <button className="ml-2 text-blue-600 hover:text-blue-800 text-xs">Copy</button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Add this URL to your Typeform webhook settings</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expected Fields
-                      </label>
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          placeholder="name"
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
-                        <input
-                          type="text"
-                          placeholder="email"
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">+ Add Field</button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Define fields that will be available as {`{trigger.fieldname}`}</p>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Typeform ID
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Your Typeform ID"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
                   </div>
                 )}
 
                 {selectedBlock.type === 'webhook-trigger' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Webhook URL (Generated)
-                      </label>
-                      <div className="bg-gray-50 p-3 rounded-lg border">
-                        <code className="text-sm text-gray-600 break-all">
-                          https://api.apifyn.com/webhooks/generic/{selectedBlock.id}
-                        </code>
-                        <button className="ml-2 text-blue-600 hover:text-blue-800 text-xs">Copy</button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Use this URL to send POST requests to trigger your workflow</p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Webhook URL
+                    </label>
+                    <div className="bg-gray-50 p-3 rounded-lg border">
+                      <code className="text-sm text-gray-600 break-all">
+                        https://api.apifyn.com/webhooks/{selectedBlock.id}
+                      </code>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expected Data Format
-                      </label>
-                      <textarea
-                        rows="4"
-                        placeholder='{"name": "John Doe", "email": "john@example.com", "message": "Hello"}'
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Authentication
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="none">No Authentication</option>
-                        <option value="api-key">API Key</option>
-                        <option value="signature">Signature Verification</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {selectedBlock.type === 'sheets-add' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Google Account
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select Google Account</option>
-                        <option value="connect">Connect Google Account</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Spreadsheet URL
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://docs.google.com/spreadsheets/d/..."
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Worksheet Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Sheet1"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Column Mapping
-                      </label>
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <input type="text" placeholder="Column A" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                          <input type="text" placeholder="{{trigger.name}}" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                        </div>
-                        <div className="flex gap-2">
-                          <input type="text" placeholder="Column B" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                          <input type="text" placeholder="{{trigger.email}}" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" />
-                        </div>
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">+ Add Column</button>
-                      </div>
-                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Use this URL to send data to trigger your workflow
+                    </p>
                   </div>
                 )}
 
                 {selectedBlock.type === 'delay' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Delay Duration
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          placeholder="5"
-                          min="1"
-                          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <select className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                          <option value="seconds">Seconds</option>
-                          <option value="minutes">Minutes</option>
-                          <option value="hours">Hours</option>
-                          <option value="days">Days</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Delay Type
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="fixed">Fixed Delay</option>
-                        <option value="dynamic">Dynamic Delay (from data)</option>
-                        <option value="scheduled">Schedule for specific time</option>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Delay Duration
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="5"
+                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <select className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="seconds">Seconds</option>
+                        <option value="minutes">Minutes</option>
+                        <option value="hours">Hours</option>
+                        <option value="days">Days</option>
                       </select>
                     </div>
                   </div>
@@ -1281,59 +1003,6 @@ const WorkflowBuilder = () => {
             Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Esc</kbd> to cancel
           </div>
         </div>
-      </div>
-
-      {/* Toast Notifications */}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
-        <AnimatePresence>
-          {toasts.map((toast) => (
-            <motion.div
-              key={toast.id}
-              initial={{ opacity: 0, x: 300, scale: 0.8 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 300, scale: 0.8 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className={`
-                px-6 py-4 rounded-xl shadow-2xl backdrop-blur-sm max-w-sm border-l-4 relative
-                ${toast.type === 'success' ? 'bg-green-50/90 border-green-500 text-green-800' : 
-                  toast.type === 'error' ? 'bg-red-50/90 border-red-500 text-red-800' : 
-                  toast.type === 'warning' ? 'bg-yellow-50/90 border-yellow-500 text-yellow-800' : 
-                  'bg-blue-50/90 border-blue-500 text-blue-800'}
-              `}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                  {toast.type === 'error' && <X className="w-5 h-5 text-red-600" />}
-                  {toast.type === 'warning' && <Zap className="w-5 h-5 text-yellow-600" />}
-                  {toast.type === 'info' && <Zap className="w-5 h-5 text-blue-600" />}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium leading-relaxed">{toast.message}</p>
-                </div>
-                <button
-                  onClick={() => removeToast(toast.id)}
-                  className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              
-              {/* Progress bar */}
-              <motion.div
-                className={`absolute bottom-0 left-0 h-1 rounded-full ${
-                  toast.type === 'success' ? 'bg-green-500' : 
-                  toast.type === 'error' ? 'bg-red-500' : 
-                  toast.type === 'warning' ? 'bg-yellow-500' : 
-                  'bg-blue-500'
-                }`}
-                initial={{ width: '100%' }}
-                animate={{ width: '0%' }}
-                transition={{ duration: 4, ease: "linear" }}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
       </div>
     </div>
   );

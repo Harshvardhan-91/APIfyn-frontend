@@ -18,30 +18,30 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-// Fallback metrics for offline/error scenarios
-const fallbackMetrics = {
+// Default empty metrics
+const defaultMetrics = {
   executions: {
-    current: 1234,
-    previous: 1089,
-    change: 13.3,
+    current: 0,
+    previous: 0,
+    change: 0,
     label: 'Total Executions'
   },
   workflows: {
-    current: 12,
-    previous: 10,
-    change: 20.0,
+    current: 0,
+    previous: 0,
+    change: 0,
     label: 'Active Workflows'
   },
   success: {
-    current: 98.7,
-    previous: 97.2,
-    change: 1.5,
+    current: 0,
+    previous: 0,
+    change: 0,
     label: 'Success Rate'
   },
   response: {
-    current: 245,
-    previous: 289,
-    change: -15.2,
+    current: 0,
+    previous: 0,
+    change: 0,
     label: 'Avg Response Time (ms)'
   }
 };
@@ -68,12 +68,12 @@ const Analytics = () => {
         if (data.success) {
           setAnalyticsData(data.analytics);
         } else {
-          // Use fallback data on error
-          setAnalyticsData(fallbackMetrics);
+          // Use default empty data on error
+          setAnalyticsData(defaultMetrics);
         }
       } catch (error) {
         console.error('Error fetching analytics:', error);
-        setAnalyticsData(fallbackMetrics);
+        setAnalyticsData(defaultMetrics);
       } finally {
         setLoading(false);
       }
@@ -82,41 +82,14 @@ const Analytics = () => {
     fetchAnalytics();
   }, [user, timeRange]);
 
-  // Use analytics data if available, otherwise fallback
-  const metrics = analyticsData || fallbackMetrics;
+  // Use analytics data if available, otherwise default empty metrics
+  const metrics = analyticsData || defaultMetrics;
 
-  
-  const workflowStats = [
-    { name: 'Customer Onboarding', executions: 456, success: 99.1, errors: 4, trend: 'up' },
-    { name: 'Lead Qualification', executions: 289, success: 97.5, errors: 7, trend: 'up' },
-    { name: 'Social Media Monitoring', executions: 234, success: 98.8, errors: 3, trend: 'down' },
-    { name: 'Invoice Processing', executions: 189, success: 95.2, errors: 9, trend: 'up' },
-    { name: 'Email Campaigns', executions: 66, success: 100, errors: 0, trend: 'up' }
-  ];
+  // Get workflow stats from analytics data or use empty array
+  const workflowStats = analyticsData?.workflowStats || [];
 
-  const recentErrors = [
-    { 
-      id: 1, 
-      workflow: 'Customer Onboarding', 
-      error: 'API rate limit exceeded', 
-      time: '2 minutes ago',
-      severity: 'high'
-    },
-    { 
-      id: 2, 
-      workflow: 'Lead Qualification', 
-      error: 'Invalid email format', 
-      time: '15 minutes ago',
-      severity: 'medium'
-    },
-    { 
-      id: 3, 
-      workflow: 'Invoice Processing', 
-      error: 'Connection timeout', 
-      time: '1 hour ago',
-      severity: 'low'
-    }
-  ];
+  // Get recent errors from analytics data or use empty array
+  const recentErrors = analyticsData?.recentErrors || [];
 
   const getChangeColor = (change) => {
     if (change > 0) return 'text-green-600';

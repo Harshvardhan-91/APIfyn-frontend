@@ -34,55 +34,36 @@ const Templates = () => {
 
   // Fetch templates from backend
   useEffect(() => {
-    const mockTemplates = [
-      {
-        id: 1,
-        name: "Customer Onboarding Automation",
-        description: "Automatically welcome new customers with personalized emails and setup their accounts",
-        category: "Customer Success",
-        type: "popular",
-        apps: ["Typeform", "Gmail", "Slack", "Google Sheets"],
-        icon: <Users className="w-6 h-6" />,
-        color: "bg-blue-100 text-blue-600",
-        rating: 4.8,
-        uses: 1234,
-        time: "5 min",
-        complexity: "Beginner"
-      },
-      {
-        id: 2,
-        name: "Lead Qualification Pipeline",
-        description: "Score leads from forms and route them to the right sales team automatically",
-        category: "Sales",
-        type: "popular",
-        apps: ["Typeform", "HubSpot", "Slack"],
-        icon: <Database className="w-6 h-6" />,
-        color: "bg-green-100 text-green-600",
-        rating: 4.9,
-        uses: 987,
-        time: "10 min",
-        complexity: "Intermediate"
-      }
-    ];
-
     const fetchTemplates = async () => {
+      if (!user?.idToken) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        const response = await fetch('/api/templates');
-        const data = await response.json();
-        if (data.success) {
-          setTemplates(data.templates);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/template`, {
+          headers: {
+            'Authorization': `Bearer ${user.idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setTemplates(result.templates || []);
+          }
         }
       } catch (error) {
         console.error('Error fetching templates:', error);
-        // Fallback to mock data on error
-        setTemplates(mockTemplates);
+        setTemplates([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTemplates();
-  }, []);
+  }, [user]);
 
   const categories = [
     'all', 'Customer Success', 'Sales', 'Marketing', 'Finance', 
