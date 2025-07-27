@@ -72,7 +72,7 @@ function Hero() {
       {/* Clean background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white" />
       
-      {/* Subtle grid pattern */}
+      {/* Subtle grid pattern - full width */}
       <div className="absolute inset-0 opacity-[0.08]">
         <div className="h-full w-full" style={{
           backgroundImage: `
@@ -83,7 +83,7 @@ function Hero() {
         }} />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-16">
+      <div className="relative z-10 mx-[5%] pt-20 pb-16">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Content */}
           <motion.div
@@ -484,7 +484,7 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-4 lg:-mt-32 lg:ml-auto lg:max-w-2xl"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-16 lg:mt-8"
         >
           {stats.map((stat, index) => (
             <motion.div
