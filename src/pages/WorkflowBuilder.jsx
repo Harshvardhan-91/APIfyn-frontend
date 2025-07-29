@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { 
   Save, 
   Undo, 
@@ -86,34 +86,205 @@ const WorkflowBuilder = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  // Block Library
+  // Block Library with real logos and integration requirements
   const blockLibrary = {
     triggers: [
-      { id: 'typeform-trigger', name: 'Typeform Submission', icon: <FileText className="w-5 h-5" />, color: 'bg-blue-100 text-blue-600', description: 'Triggered when a new form is submitted' },
-      { id: 'gmail-trigger', name: 'Gmail Received', icon: <Mail className="w-5 h-5" />, color: 'bg-red-100 text-red-600', description: 'Triggered when a new email is received' },
-      { id: 'stripe-trigger', name: 'Stripe Payment', icon: <CreditCard className="w-5 h-5" />, color: 'bg-purple-100 text-purple-600', description: 'Triggered when a payment is made' },
-      { id: 'webhook-trigger', name: 'Webhook', icon: <Webhook className="w-5 h-5" />, color: 'bg-gray-100 text-gray-600', description: 'Triggered when webhook receives data' },
-      { id: 'calendar-trigger', name: 'Calendar Event', icon: <Calendar className="w-5 h-5" />, color: 'bg-green-100 text-green-600', description: 'Triggered when calendar event occurs' },
-      { id: 'slack-trigger', name: 'Slack Message', icon: <MessageSquare className="w-5 h-5" />, color: 'bg-purple-100 text-purple-600', description: 'Triggered when Slack message is received' }
+      { 
+        id: 'typeform-trigger', 
+        name: 'Typeform Submission', 
+        icon: <img src="https://images.typeform.com/images/2dpnUBBkz2VN" alt="Typeform" className="w-5 h-5 rounded" />, 
+        color: 'bg-blue-50', 
+        description: 'Triggered when a new form is submitted',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Forms'
+      },
+      { 
+        id: 'gmail-trigger', 
+        name: 'Gmail Received', 
+        icon: <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" alt="Gmail" className="w-5 h-5 rounded" />, 
+        color: 'bg-red-50', 
+        description: 'Triggered when a new email is received',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Email'
+      },
+      { 
+        id: 'stripe-trigger', 
+        name: 'Stripe Payment', 
+        icon: <div className="w-5 h-5 bg-purple-600 rounded flex items-center justify-center text-white font-bold text-xs">S</div>, 
+        color: 'bg-purple-50', 
+        description: 'Triggered when a payment is made',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Payments'
+      },
+      { 
+        id: 'webhook-trigger', 
+        name: 'Webhook', 
+        icon: <Webhook className="w-5 h-5" />, 
+        color: 'bg-gray-100 text-gray-600', 
+        description: 'Triggered when webhook receives data',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Developer Tools'
+      },
+      { 
+        id: 'calendar-trigger', 
+        name: 'Google Calendar', 
+        icon: <img src="https://ssl.gstatic.com/calendar/images/favicon_v2014_26.ico" alt="Google Calendar" className="w-5 h-5 rounded" />, 
+        color: 'bg-blue-50', 
+        description: 'Triggered when calendar event occurs',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Calendar'
+      },
+      { 
+        id: 'slack-trigger', 
+        name: 'Slack Message', 
+        icon: <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" className="w-5 h-5 rounded" />, 
+        color: 'bg-purple-50', 
+        description: 'Triggered when Slack message is received',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Communication'
+      }
     ],
     actions: [
-      { id: 'gmail-send', name: 'Send Gmail', icon: <Mail className="w-5 h-5" />, color: 'bg-red-100 text-red-600', description: 'Send an email via Gmail' },
-      { id: 'slack-send', name: 'Send Slack Message', icon: <MessageSquare className="w-5 h-5" />, color: 'bg-purple-100 text-purple-600', description: 'Send a message to Slack channel' },
-      { id: 'sheets-add', name: 'Add to Google Sheets', icon: <Database className="w-5 h-5" />, color: 'bg-green-100 text-green-600', description: 'Add row to Google Sheets' },
-      { id: 'notion-create', name: 'Create Notion Page', icon: <Database className="w-5 h-5" />, color: 'bg-gray-100 text-gray-600', description: 'Create a new Notion page' },
-      { id: 'webhook-send', name: 'Send Webhook', icon: <Webhook className="w-5 h-5" />, color: 'bg-blue-100 text-blue-600', description: 'Send data to webhook URL' },
-      { id: 'discord-send', name: 'Send Discord Message', icon: <MessageSquare className="w-5 h-5" />, color: 'bg-indigo-100 text-indigo-600', description: 'Send message to Discord channel' }
+      { 
+        id: 'gmail-send', 
+        name: 'Send Gmail', 
+        icon: <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" alt="Gmail" className="w-5 h-5 rounded" />, 
+        color: 'bg-red-50', 
+        description: 'Send an email via Gmail',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Email'
+      },
+      { 
+        id: 'slack-send', 
+        name: 'Send Slack Message', 
+        icon: <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" className="w-5 h-5 rounded" />, 
+        color: 'bg-purple-50', 
+        description: 'Send a message to Slack channel',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Communication'
+      },
+      { 
+        id: 'sheets-add', 
+        name: 'Google Sheets', 
+        icon: <img src="https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png" alt="Google Sheets" className="w-5 h-5 rounded" />, 
+        color: 'bg-green-50', 
+        description: 'Add row to Google Sheets',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Productivity'
+      },
+      { 
+        id: 'notion-create', 
+        name: 'Notion', 
+        icon: <img src="https://www.notion.so/images/favicon.ico" alt="Notion" className="w-5 h-5 rounded" />, 
+        color: 'bg-gray-50', 
+        description: 'Create a new Notion page',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Productivity'
+      },
+      { 
+        id: 'webhook-send', 
+        name: 'Send Webhook', 
+        icon: <Webhook className="w-5 h-5" />, 
+        color: 'bg-blue-100 text-blue-600', 
+        description: 'Send data to webhook URL',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Developer Tools'
+      },
+      { 
+        id: 'discord-send', 
+        name: 'Discord', 
+        icon: <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-xs">D</div>, 
+        color: 'bg-indigo-50', 
+        description: 'Send message to Discord channel',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Communication'
+      }
     ],
     conditions: [
-      { id: 'if-condition', name: 'If/Then', icon: <Zap className="w-5 h-5" />, color: 'bg-yellow-100 text-yellow-600', description: 'Add conditional logic' },
-      { id: 'filter', name: 'Filter', icon: <Filter className="w-5 h-5" />, color: 'bg-orange-100 text-orange-600', description: 'Filter data based on conditions' },
-      { id: 'switch', name: 'Switch', icon: <Zap className="w-5 h-5" />, color: 'bg-pink-100 text-pink-600', description: 'Route data based on conditions' }
+      { 
+        id: 'if-condition', 
+        name: 'If/Then Logic', 
+        icon: <div className="w-5 h-5 bg-yellow-500 rounded flex items-center justify-center text-white font-bold text-xs">?</div>, 
+        color: 'bg-yellow-50', 
+        description: 'Add conditional logic to your workflow',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Logic'
+      },
+      { 
+        id: 'filter', 
+        name: 'Data Filter', 
+        icon: <Filter className="w-5 h-5" />, 
+        color: 'bg-orange-100 text-orange-600', 
+        description: 'Filter data based on conditions',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Logic'
+      },
+      { 
+        id: 'switch', 
+        name: 'Multi-path Switch', 
+        icon: <div className="w-5 h-5 bg-pink-500 rounded flex items-center justify-center text-white font-bold text-xs">◊</div>, 
+        color: 'bg-pink-50', 
+        description: 'Route data based on multiple conditions',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Logic'
+      }
     ],
     utilities: [
-      { id: 'delay', name: 'Delay', icon: <Clock className="w-5 h-5" />, color: 'bg-gray-100 text-gray-600', description: 'Add delay before next action' },
-      { id: 'formatter', name: 'Format Data', icon: <Code className="w-5 h-5" />, color: 'bg-teal-100 text-teal-600', description: 'Transform and format data' },
-      { id: 'code', name: 'Custom Code', icon: <Code className="w-5 h-5" />, color: 'bg-indigo-100 text-indigo-600', description: 'Execute custom JavaScript code' },
-      { id: 'logger', name: 'Log Data', icon: <FileText className="w-5 h-5" />, color: 'bg-blue-100 text-blue-600', description: 'Log data for debugging' }
+      { 
+        id: 'delay', 
+        name: 'Delay Timer', 
+        icon: <Clock className="w-5 h-5" />, 
+        color: 'bg-gray-100 text-gray-600', 
+        description: 'Add time delay before next action',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Utility'
+      },
+      { 
+        id: 'formatter', 
+        name: 'Data Formatter', 
+        icon: <div className="w-5 h-5 bg-teal-500 rounded flex items-center justify-center text-white font-bold text-xs">{ }</div>, 
+        color: 'bg-teal-50', 
+        description: 'Transform and format data',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Utility'
+      },
+      { 
+        id: 'code', 
+        name: 'Custom Code', 
+        icon: <Code className="w-5 h-5" />, 
+        color: 'bg-indigo-100 text-indigo-600', 
+        description: 'Execute custom JavaScript code',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Utility'
+      },
+      { 
+        id: 'logger', 
+        name: 'Debug Logger', 
+        icon: <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white font-bold text-xs">📋</div>, 
+        color: 'bg-blue-50', 
+        description: 'Log data for debugging and monitoring',
+        integrationRequired: false,
+        integrationStatus: 'ready',
+        category: 'Utility'
+      }
     ]
   };
 
@@ -132,6 +303,21 @@ const WorkflowBuilder = () => {
 
       if (blocks.length === 0) {
         showToast('Please add at least one block to your workflow', 'warning');
+        return;
+      }
+
+      // Check for unintegrated apps
+      const unintegratedBlocks = blocks.filter(block => 
+        block.integrationRequired && 
+        (block.integrationStatus === 'not-connected' || block.status === 'requires-integration')
+      );
+
+      if (unintegratedBlocks.length > 0) {
+        const blockNames = unintegratedBlocks.map(block => block.name).join(', ');
+        showToast(
+          `Please integrate these apps before saving: ${blockNames}. Click on each block to authorize the integration.`, 
+          'warning'
+        );
         return;
       }
 
@@ -291,7 +477,10 @@ const WorkflowBuilder = () => {
       description: draggedBlock.description,
       position: { x, y },
       config: {},
-      status: 'not-configured'
+      status: draggedBlock.integrationRequired && draggedBlock.integrationStatus !== 'ready' ? 'requires-integration' : 'not-configured',
+      integrationRequired: draggedBlock.integrationRequired,
+      integrationStatus: draggedBlock.integrationStatus,
+      category: draggedBlock.category
     };
 
     setBlocks(prev => [...prev, newBlock]);
@@ -427,6 +616,12 @@ const WorkflowBuilder = () => {
   };
 
   const handlePublish = () => {
+    if (!workflowName.trim()) {
+      showToast('Please name your workflow before publishing', 'warning');
+      setIsEditing(true);
+      return;
+    }
+
     if (blocks.length === 0) {
       showToast('Please add blocks to your workflow before publishing', 'warning');
       return;
@@ -434,6 +629,21 @@ const WorkflowBuilder = () => {
     
     if (connections.length === 0 && blocks.length > 1) {
       showToast('Please connect your blocks before publishing', 'warning');
+      return;
+    }
+
+    // Check for unintegrated apps
+    const unintegratedBlocks = blocks.filter(block => 
+      block.integrationRequired && 
+      (block.integrationStatus === 'not-connected' || block.status === 'requires-integration')
+    );
+
+    if (unintegratedBlocks.length > 0) {
+      const blockNames = unintegratedBlocks.map(block => block.name).join(', ');
+      showToast(
+        `Please integrate these apps before publishing: ${blockNames}`, 
+        'warning'
+      );
       return;
     }
     
@@ -444,6 +654,57 @@ const WorkflowBuilder = () => {
     setTimeout(() => {
       showToast('Workflow published successfully! 🚀', 'success');
     }, 1500);
+  };
+
+  // Function to check integration status from backend
+  const checkIntegrationStatus = async (provider) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration/status`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.integrations[provider] === 'connected') {
+          // Update blocks that use this provider
+          const providerTypes = [`${provider}-trigger`, `${provider}-send`];
+          
+          setBlocks(prev => prev.map(b => 
+            providerTypes.includes(b.type)
+              ? { ...b, integrationStatus: 'connected', status: 'configured' }
+              : b
+          ));
+          
+          if (selectedBlock && providerTypes.includes(selectedBlock.type)) {
+            setSelectedBlock(prev => ({ ...prev, integrationStatus: 'connected', status: 'configured' }));
+          }
+          
+          showToast(`${provider} integration successful! ✅`, 'success');
+        } else {
+          showToast(`${provider} integration was not completed. Please try again.`, 'warning');
+        }
+      } else {
+        showToast('Failed to check integration status', 'error');
+      }
+    } catch (error) {
+      console.error('Status check error:', error);
+      showToast('Failed to verify integration status', 'error');
+    }
+  };
+
+  // Function to check if a block type has any connected instances
+  const getBlockTypeIntegrationStatus = (blockTypeId) => {
+    const instancesOfType = blocks.filter(block => block.type === blockTypeId);
+    if (instancesOfType.length === 0) return 'not-connected';
+    
+    const hasConnected = instancesOfType.some(block => block.integrationStatus === 'connected');
+    if (hasConnected) return 'connected';
+    
+    return 'not-connected';
   };
 
   const filteredBlocks = Object.entries(blockLibrary).reduce((acc, [category, blocks]) => {
@@ -459,42 +720,57 @@ const WorkflowBuilder = () => {
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Top Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-4">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm min-h-[80px]">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
           <button
             onClick={() => navigate('/workflows')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
-            {isEditing ? (
-              <input
-                type="text"
-                value={workflowName}
-                onChange={(e) => setWorkflowName(e.target.value)}
-                onBlur={() => setIsEditing(false)}
-                onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
-                placeholder="Enter workflow name..."
-                className="text-lg font-semibold bg-transparent border-2 border-blue-500 outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
-                autoFocus
-              />
-            ) : (
-              <h1 
-                className={`text-lg font-semibold cursor-pointer hover:bg-gray-100 px-2 py-1 rounded ${
-                  !workflowName ? 'text-gray-400' : ''
-                }`}
-                onClick={() => setIsEditing(true)}
-              >
-                {workflowName || 'Untitled Workflow - Click to name'}
-              </h1>
-            )}
+          
+          {/* Prominent Workflow Name Section */}
+          <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors flex-1 min-w-0 max-w-2xl">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={workflowName}
+                  onChange={(e) => setWorkflowName(e.target.value)}
+                  onBlur={() => setIsEditing(false)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
+                  placeholder="Enter workflow name..."
+                  className="text-xl font-bold bg-transparent border-none outline-none focus:ring-0 text-gray-800 placeholder-gray-400 w-full"
+                  autoFocus
+                />
+              ) : (
+                <h1 
+                  className={`text-xl font-bold cursor-pointer hover:text-blue-600 transition-colors truncate ${
+                    !workflowName ? 'text-gray-400' : 'text-gray-800'
+                  }`}
+                  onClick={() => setIsEditing(true)}
+                  title={workflowName || 'Click to name your workflow'}
+                >
+                  {workflowName || 'Click to name your workflow'}
+                </h1>
+              )}
+            </div>
             <button
               onClick={() => setIsEditing(true)}
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
+              title="Edit workflow name"
             >
               <Edit3 className="w-4 h-4 text-gray-500" />
             </button>
+          </div>
+          
+          {/* Workflow Status */}
+          <div className="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
+            <div className={`w-2 h-2 rounded-full ${workflowName ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span>{workflowName ? 'Named' : 'Unnamed'}</span>
           </div>
         </div>
 
@@ -601,21 +877,34 @@ const WorkflowBuilder = () => {
                       exit={{ height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-4 pb-4 space-y-2">
+                      <div className="space-y-2">
                         {blocks.map((block) => (
                           <div
                             key={block.id}
                             draggable
                             onDragStart={(e) => handleDragStart(e, block)}
-                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-move group"
+                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-move group border-l-3 border-transparent hover:border-blue-400"
                             title={block.description}
                           >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${block.color} flex-shrink-0`}>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${block.color} flex-shrink-0 shadow-sm`}>
                               {block.icon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-sm font-medium text-gray-900 block">{block.name}</span>
-                              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{block.description}</p>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium text-gray-900 block">{block.name}</span>
+                                {block.integrationRequired && (
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    getBlockTypeIntegrationStatus(block.id) === 'connected' ? 'bg-green-500' :
+                                    'bg-yellow-500'
+                                  }`} title={`Integration ${getBlockTypeIntegrationStatus(block.id)}`}></div>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 line-clamp-2 mb-1">{block.description}</p>
+                              {block.category && (
+                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                                  {block.category}
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -787,12 +1076,24 @@ const WorkflowBuilder = () => {
 
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${block.color} shadow-sm`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${block.color} shadow-sm relative`}>
                             {block.icon}
+                            {block.integrationRequired && block.integrationStatus !== 'connected' && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-white" 
+                                   title="Integration required"></div>
+                            )}
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900 text-base">{block.name}</h3>
-                            <p className="text-xs text-gray-500 capitalize">{block.type.replace('-', ' ')}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs text-gray-500 capitalize">{block.type.replace('-', ' ')}</p>
+                              {block.category && (
+                                <>
+                                  <span className="text-xs text-gray-300">•</span>
+                                  <span className="text-xs text-blue-600">{block.category}</span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
@@ -828,11 +1129,17 @@ const WorkflowBuilder = () => {
                               block.status === 'configured' ? 'bg-green-500' :
                               block.status === 'error' ? 'bg-red-500' :
                               block.status === 'testing' ? 'bg-yellow-500 animate-pulse' :
+                              block.status === 'requires-integration' ? 'bg-orange-500' :
                               'bg-gray-300'
                             }`}></div>
                             <span className="text-xs text-gray-500 capitalize">
-                              {block.status.replace('-', ' ')}
+                              {block.status === 'requires-integration' ? 'Needs Integration' : block.status.replace('-', ' ')}
                             </span>
+                            {block.integrationRequired && block.integrationStatus !== 'connected' && (
+                              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                                Integration Required
+                              </span>
+                            )}
                           </div>
                           
                           <div className="text-xs text-gray-400 flex items-center gap-4">
@@ -899,14 +1206,142 @@ const WorkflowBuilder = () => {
                 </div>
                 
                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedBlock.color}`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedBlock.color} relative`}>
                     {selectedBlock.icon}
+                    {selectedBlock.integrationRequired && selectedBlock.integrationStatus !== 'connected' && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-white" 
+                           title="Integration required"></div>
+                    )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-semibold text-gray-900">{selectedBlock.name}</h4>
                     <p className="text-sm text-gray-600">{selectedBlock.description}</p>
+                    {selectedBlock.category && (
+                      <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                        {selectedBlock.category}
+                      </span>
+                    )}
                   </div>
                 </div>
+
+                {/* Integration Status & Authorization */}
+                {selectedBlock.integrationRequired && (
+                  <div className={`p-4 rounded-xl border-2 ${
+                    selectedBlock.integrationStatus === 'connected' 
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${
+                          selectedBlock.integrationStatus === 'connected' ? 'bg-green-500' : 'bg-yellow-500'
+                        }`}></div>
+                        <span className="font-medium text-gray-900">
+                          {selectedBlock.integrationStatus === 'connected' ? 'Integration Connected' : 'Integration Required'}
+                        </span>
+                      </div>
+                      {selectedBlock.integrationStatus === 'connected' && (
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      )}
+                    </div>
+                    
+                    {selectedBlock.integrationStatus !== 'connected' ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-gray-600">
+                          This block requires authorization to access your {selectedBlock.name} account.
+                        </p>
+                        <button
+                          onClick={async () => {
+                            try {
+                              showToast(`Initiating ${selectedBlock.name} authorization...`, 'info');
+                              
+                              // Get the provider name from block type
+                              let provider = '';
+                              if (selectedBlock.type.includes('gmail')) provider = 'gmail';
+                              else if (selectedBlock.type.includes('slack')) provider = 'slack';
+                              else if (selectedBlock.type.includes('notion')) provider = 'notion';
+                              else if (selectedBlock.type.includes('discord')) provider = 'discord';
+                              else if (selectedBlock.type.includes('stripe')) provider = 'stripe';
+                              else if (selectedBlock.type.includes('typeform')) provider = 'typeform';
+                              
+                              if (!provider) {
+                                showToast('Integration not yet supported', 'warning');
+                                return;
+                              }
+                              
+                              // Call backend to get OAuth URL
+                              const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration/oauth/${provider}/authorize`, {
+                                method: 'GET',
+                                headers: {
+                                  'Authorization': `Bearer ${user.idToken}`,
+                                  'Content-Type': 'application/json',
+                                },
+                              });
+                              
+                              if (response.ok) {
+                                const data = await response.json();
+                                if (data.success && data.authUrl) {
+                                  showToast(`Redirecting to ${selectedBlock.name}...`, 'info');
+                                  
+                                  // Open OAuth in new window
+                                  const authWindow = window.open(data.authUrl, '_blank', 'width=600,height=700');
+                                  
+                                  // Monitor for window closure (user completed or cancelled OAuth)
+                                  const checkClosed = setInterval(() => {
+                                    if (authWindow?.closed) {
+                                      clearInterval(checkClosed);
+                                      showToast('Authorization window closed. Please check if integration was successful.', 'info');
+                                      
+                                      // Check integration status from backend instead of assuming success
+                                      checkIntegrationStatus(provider);
+                                    }
+                                  }, 1000);
+                                  
+                                } else {
+                                  showToast('Failed to get authorization URL from server', 'error');
+                                }
+                              } else {
+                                const errorData = await response.json().catch(() => ({}));
+                                showToast(`OAuth configuration missing: ${errorData.message || 'Please configure OAuth credentials in server environment'}`, 'error');
+                              }
+                              
+                            } catch (error) {
+                              console.error('Authorization error:', error);
+                              showToast(`Authorization failed: ${error.message}`, 'error');
+                            }
+                          }}
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2 font-medium"
+                        >
+                          <Link className="w-5 h-5" />
+                          Authorize {selectedBlock.name}
+                        </button>
+                        <p className="text-xs text-gray-500 text-center">
+                          You'll be redirected to {selectedBlock.name} for secure authorization
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-sm text-green-700">
+                          ✅ Successfully connected to your {selectedBlock.name} account
+                        </p>
+                        <button
+                          onClick={() => {
+                            setBlocks(prev => prev.map(b => 
+                              b.id === selectedBlock.id 
+                                ? { ...b, integrationStatus: 'not-connected', status: 'requires-integration' }
+                                : b
+                            ));
+                            setSelectedBlock(prev => ({ ...prev, integrationStatus: 'not-connected', status: 'requires-integration' }));
+                            showToast(`${selectedBlock.name} disconnected`, 'info');
+                          }}
+                          className="text-sm text-red-600 hover:text-red-800 underline"
+                        >
+                          Disconnect Integration
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="flex-1 p-6 space-y-6 overflow-y-auto">
@@ -1266,20 +1701,24 @@ const WorkflowBuilder = () => {
             <span>{connections.length} connections</span>
           </div>
           <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${
+              blocks.filter(b => b.integrationRequired && b.integrationStatus === 'connected').length === blocks.filter(b => b.integrationRequired).length
+                ? 'bg-green-500' : 'bg-orange-500'
+            }`}></div>
+            <span>
+              {blocks.filter(b => b.integrationRequired && b.integrationStatus === 'connected').length}/
+              {blocks.filter(b => b.integrationRequired).length} integrations
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnecting ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}`}></div>
             <span>{isConnecting ? 'Connecting...' : 'Ready'}</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-xs text-gray-500">
-            Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+S</kbd> to save
-          </div>
-          <div className="text-xs text-gray-500">
-            Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Del</kbd> to delete selected
-          </div>
-          <div className="text-xs text-gray-500">
-            Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Esc</kbd> to cancel
-          </div>
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          <div>Press <kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl+S</kbd> to save</div>
+          <div>Press <kbd className="px-2 py-1 bg-gray-100 rounded">Del</kbd> to delete selected</div>
+          <div>Press <kbd className="px-2 py-1 bg-gray-100 rounded">Esc</kbd> to cancel</div>
         </div>
       </div>
 
