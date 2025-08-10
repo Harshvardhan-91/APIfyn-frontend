@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { 
   Save, 
   Undo, 
@@ -42,6 +42,8 @@ const WorkflowBuilder = () => {
   
   const [workflowName, setWorkflowName] = useState('');
   const [isEditing, setIsEditing] = useState(true);
+  const [showNamingDialog, setShowNamingDialog] = useState(false);
+  const [tempWorkflowName, setTempWorkflowName] = useState('');
   const [zoom, setZoom] = useState(1);
   const [canvasPosition] = useState({ x: 0, y: 0 });
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -296,8 +298,9 @@ const WorkflowBuilder = () => {
       }
 
       if (!workflowName.trim()) {
-        showToast('Please enter a workflow name before saving', 'warning');
-        setIsEditing(true);
+        // Show naming dialog instead of toast
+        setTempWorkflowName(workflowName);
+        setShowNamingDialog(true);
         return;
       }
 
@@ -376,6 +379,22 @@ const WorkflowBuilder = () => {
       showToast('Error saving workflow: ' + error.message, 'error');
     }
   }, [user, workflowName, blocks, connections, zoom, canvasPosition, navigate, showToast]);
+
+  // Handle naming dialog confirmation
+  const handleNamingConfirm = useCallback(async () => {
+    if (!tempWorkflowName.trim()) {
+      showToast('Please enter a workflow name', 'warning');
+      return;
+    }
+    
+    setWorkflowName(tempWorkflowName);
+    setShowNamingDialog(false);
+    
+    // Proceed with save after setting the name
+    setTimeout(() => {
+      handleSave();
+    }, 100);
+  }, [tempWorkflowName, handleSave, showToast]);
 
   const handleBlockDelete = useCallback((blockId) => {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
@@ -657,7 +676,7 @@ const WorkflowBuilder = () => {
   };
 
   // Function to check integration status from backend
-  const checkIntegrationStatus = async (provider) => {
+  const checkIntegrationStatus = useCallback(async (provider) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration/status`, {
         method: 'GET',
@@ -694,7 +713,10 @@ const WorkflowBuilder = () => {
       console.error('Status check error:', error);
       showToast('Failed to verify integration status', 'error');
     }
-  };
+  }, [user.idToken, selectedBlock, setBlocks, setSelectedBlock, showToast]);
+
+  // Handle OAuth callback results (removed URL parameter handling since we use postMessage)
+  // OAuth results are now handled via postMessage in the authorization button click handler
 
   // Function to check if a block type has any connected instances
   const getBlockTypeIntegrationStatus = (blockTypeId) => {
@@ -719,119 +741,6 @@ const WorkflowBuilder = () => {
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* Top Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm min-h-[80px]">
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          <button
-            onClick={() => navigate('/workflows')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          
-          {/* Prominent Workflow Name Section */}
-          <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors flex-1 min-w-0 max-w-2xl">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={workflowName}
-                  onChange={(e) => setWorkflowName(e.target.value)}
-                  onBlur={() => setIsEditing(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
-                  placeholder="Enter workflow name..."
-                  className="text-xl font-bold bg-transparent border-none outline-none focus:ring-0 text-gray-800 placeholder-gray-400 w-full"
-                  autoFocus
-                />
-              ) : (
-                <h1 
-                  className={`text-xl font-bold cursor-pointer hover:text-blue-600 transition-colors truncate ${
-                    !workflowName ? 'text-gray-400' : 'text-gray-800'
-                  }`}
-                  onClick={() => setIsEditing(true)}
-                  title={workflowName || 'Click to name your workflow'}
-                >
-                  {workflowName || 'Click to name your workflow'}
-                </h1>
-              )}
-            </div>
-            <button
-              onClick={() => setIsEditing(true)}
-              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
-              title="Edit workflow name"
-            >
-              <Edit3 className="w-4 h-4 text-gray-500" />
-            </button>
-          </div>
-          
-          {/* Workflow Status */}
-          <div className="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
-            <div className={`w-2 h-2 rounded-full ${workflowName ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span>{workflowName ? 'Named' : 'Unnamed'}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Undo (Ctrl+Z)">
-            <Undo className="w-4 h-4" />
-          </button>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Redo (Ctrl+Y)">
-            <Redo className="w-4 h-4" />
-          </button>
-          <div className="w-px h-5 bg-gray-300 mx-2"></div>
-          <button 
-            onClick={() => setZoom(prev => Math.min(prev + 0.1, 2))}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Zoom In"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
-          <span className="text-sm text-gray-600 px-2 min-w-[50px] text-center">{Math.round(zoom * 100)}%</span>
-          <button 
-            onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Zoom Out"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => setZoom(1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Reset Zoom"
-          >
-            <Maximize className="w-4 h-4" />
-          </button>
-          <div className="w-px h-5 bg-gray-300 mx-2"></div>
-          <button
-            onClick={handleTestRun}
-            className="bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 text-sm"
-            title="Test Run (Requires connected blocks)"
-          >
-            <TestTube className="w-4 h-4" />
-            Test Run
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm"
-            title="Save (Ctrl+S)"
-          >
-            <Save className="w-4 h-4" />
-            Save
-          </button>
-          <button
-            onClick={handlePublish}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 text-sm"
-            title="Publish Workflow"
-          >
-            <Rocket className="w-4 h-4" />
-            Publish
-          </button>
-        </div>
-      </div>
-
       <div className="flex-1 flex min-h-0">
         {/* Left Sidebar - Block Library */}
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
@@ -924,6 +833,12 @@ const WorkflowBuilder = () => {
             className="w-full h-full bg-gray-50 relative overflow-hidden"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            onClick={(e) => {
+              // Close sidebar when clicking on empty canvas area
+              if (e.target === e.currentTarget && selectedBlock) {
+                setSelectedBlock(null);
+              }
+            }}
             style={{
               backgroundImage: `radial-gradient(circle, #e5e7eb 1px, transparent 1px)`,
               backgroundSize: '20px 20px',
@@ -1188,34 +1103,56 @@ const WorkflowBuilder = () => {
         {/* Right Sidebar - Block Configuration */}
         <AnimatePresence>
           {selectedBlock && (
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: 360 }}
-              exit={{ width: 0 }}
-              className="bg-white border-l border-gray-200 overflow-hidden flex flex-col"
-            >
-              <div className="p-6 border-b border-gray-200">
+            <>
+              {/* Overlay to close sidebar when clicked */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/10 z-30 lg:hidden"
+                onClick={() => setSelectedBlock(null)}
+              />
+              
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: 400 }}
+                exit={{ width: 0 }}
+                className="bg-white border-l-2 border-gray-200 overflow-hidden flex flex-col h-full shadow-lg relative z-40"
+              >
+                {/* Prominent Close Button at Top */}
+                <div className="absolute top-3 right-3 z-20">
+                  <button
+                    onClick={() => setSelectedBlock(null)}
+                    className="p-3 bg-white hover:bg-red-50 hover:text-red-600 rounded-full shadow-xl border-2 border-gray-300 transition-all hover:scale-110 hover:border-red-300"
+                    title="Close configuration panel (Press Esc)"
+                  >
+                    <X className="w-6 h-6 text-gray-700" />
+                  </button>
+                </div>
+              {/* Fixed Header */}
+              <div className="p-6 border-b border-gray-200 flex-shrink-0 bg-white sticky top-0 z-10">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Block Configuration</h3>
                   <button
                     onClick={() => setSelectedBlock(null)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors flex-shrink-0 border border-gray-300 shadow-sm"
+                    title="Close configuration panel"
                   >
-                    <X className="w-5 h-5 text-gray-500" />
+                    <X className="w-5 h-5 text-gray-700" />
                   </button>
                 </div>
                 
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedBlock.color} relative`}>
+                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedBlock.color} relative flex-shrink-0`}>
                     {selectedBlock.icon}
                     {selectedBlock.integrationRequired && selectedBlock.integrationStatus !== 'connected' && (
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-white" 
                            title="Integration required"></div>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">{selectedBlock.name}</h4>
-                    <p className="text-sm text-gray-600">{selectedBlock.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-900 text-sm truncate">{selectedBlock.name}</h4>
+                    <p className="text-xs text-gray-600 line-clamp-2">{selectedBlock.description}</p>
                     {selectedBlock.category && (
                       <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
                         {selectedBlock.category}
@@ -1223,27 +1160,31 @@ const WorkflowBuilder = () => {
                     )}
                   </div>
                 </div>
+              </div>
 
-                {/* Integration Status & Authorization */}
-                {selectedBlock.integrationRequired && (
-                  <div className={`p-4 rounded-xl border-2 ${
-                    selectedBlock.integrationStatus === 'connected' 
-                      ? 'bg-green-50 border-green-200' 
-                      : 'bg-yellow-50 border-yellow-200'
-                  }`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${
-                          selectedBlock.integrationStatus === 'connected' ? 'bg-green-500' : 'bg-yellow-500'
-                        }`}></div>
-                        <span className="font-medium text-gray-900">
-                          {selectedBlock.integrationStatus === 'connected' ? 'Integration Connected' : 'Integration Required'}
-                        </span>
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-8 space-y-8">
+                  {/* Integration Status & Authorization */}
+                  {selectedBlock.integrationRequired && (
+                    <div className={`p-5 rounded-xl border-2 mx-2 ${
+                      selectedBlock.integrationStatus === 'connected' 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${
+                            selectedBlock.integrationStatus === 'connected' ? 'bg-green-500' : 'bg-yellow-500'
+                          }`}></div>
+                          <span className="font-medium text-gray-900 text-sm">
+                            {selectedBlock.integrationStatus === 'connected' ? 'Integration Connected' : 'Integration Required'}
+                          </span>
+                        </div>
+                        {selectedBlock.integrationStatus === 'connected' && (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        )}
                       </div>
-                      {selectedBlock.integrationStatus === 'connected' && (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      )}
-                    </div>
                     
                     {selectedBlock.integrationStatus !== 'connected' ? (
                       <div className="space-y-3">
@@ -1286,14 +1227,41 @@ const WorkflowBuilder = () => {
                                   // Open OAuth in new window
                                   const authWindow = window.open(data.authUrl, '_blank', 'width=600,height=700');
                                   
-                                  // Monitor for window closure (user completed or cancelled OAuth)
+                                  // Listen for postMessage from OAuth window
+                                  const handleOAuthMessage = (event) => {
+                                    // Verify origin for security
+                                    if (event.origin !== import.meta.env.VITE_API_URL.replace('/api', '')) return;
+                                    
+                                    if (event.data.type === 'oauth_result' && event.data.provider === provider) {
+                                      // Remove event listener
+                                      window.removeEventListener('message', handleOAuthMessage);
+                                      
+                                      if (event.data.status === 'success') {
+                                        showToast(`${selectedBlock.name} integration successful! ✅`, 'success');
+                                        // Refresh integration status for the specific provider
+                                        checkIntegrationStatus(provider);
+                                      } else {
+                                        const errorMsg = event.data.error || 'Authorization failed';
+                                        showToast(`${selectedBlock.name} integration failed: ${errorMsg}`, 'error');
+                                        console.error('OAuth error:', errorMsg);
+                                      }
+                                    }
+                                  };
+                                  
+                                  // Add event listener for postMessage
+                                  window.addEventListener('message', handleOAuthMessage);
+                                  
+                                  // Fallback: Monitor for window closure (in case postMessage fails)
                                   const checkClosed = setInterval(() => {
                                     if (authWindow?.closed) {
                                       clearInterval(checkClosed);
-                                      showToast('Authorization window closed. Please check if integration was successful.', 'info');
+                                      window.removeEventListener('message', handleOAuthMessage);
                                       
-                                      // Check integration status from backend instead of assuming success
-                                      checkIntegrationStatus(provider);
+                                      // If no message was received, show a generic message
+                                      setTimeout(() => {
+                                        showToast('Authorization window closed. Please check if integration was successful.', 'info');
+                                        checkIntegrationStatus(provider);
+                                      }, 500);
                                     }
                                   }, 1000);
                                   
@@ -1343,26 +1311,25 @@ const WorkflowBuilder = () => {
                   </div>
                 )}
               </div>
-              
-              <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Block Name
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedBlock.name}
-                    onChange={(e) => {
-                      setBlocks(prev => prev.map(b => 
-                        b.id === selectedBlock.id 
-                          ? { ...b, name: e.target.value }
-                          : b
-                      ));
-                      setSelectedBlock(prev => ({ ...prev, name: e.target.value }));
-                    }}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+                  
+                  <div className="mx-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Block Name
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedBlock.name}
+                      onChange={(e) => {
+                        setBlocks(prev => prev.map(b => 
+                          b.id === selectedBlock.id 
+                            ? { ...b, name: e.target.value }
+                            : b
+                        ));
+                        setSelectedBlock(prev => ({ ...prev, name: e.target.value }));
+                      }}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    />
+                  </div>
 
                 {selectedBlock.type === 'gmail-send' && (
                   <div className="space-y-4">
@@ -1411,46 +1378,46 @@ const WorkflowBuilder = () => {
                 )}
 
                 {selectedBlock.type === 'discord-send' && (
-                  <div className="space-y-4">
+                  <div className="space-y-8 mx-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
                         Discord Webhook URL
                       </label>
                       <input
                         type="url"
                         placeholder="https://discord.com/api/webhooks/your-webhook-url"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Get this from Discord Server Settings → Integrations → Webhooks</p>
+                      <p className="text-xs text-gray-500 mt-3 ml-1">Get this from Discord Server Settings → Integrations → Webhooks</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
                         Channel Name (Optional)
                       </label>
                       <input
                         type="text"
                         placeholder="#new-customers"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
                         Message
                       </label>
                       <textarea
-                        rows="4"
+                        rows="5"
                         placeholder="🎉 New customer: {{trigger.name}} ({{trigger.email}}) just signed up!"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
                         Bot Username (Optional)
                       </label>
                       <input
                         type="text"
                         placeholder="APIfyn Bot"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       />
                     </div>
                   </div>
@@ -1667,7 +1634,7 @@ const WorkflowBuilder = () => {
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-gray-200">
+                <div className="pt-8 border-t border-gray-200 mx-2">
                   <button
                     onClick={() => {
                       setBlocks(prev => prev.map(b => 
@@ -1676,15 +1643,21 @@ const WorkflowBuilder = () => {
                           : b
                       ));
                       setSelectedBlock(prev => ({ ...prev, status: 'configured' }));
+                      // Close the sidebar after saving
+                      setTimeout(() => setSelectedBlock(null), 500);
                     }}
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium shadow-sm"
                   >
                     <CheckCircle className="w-5 h-5" />
                     Save Configuration
                   </button>
                 </div>
+                
+                {/* Bottom padding to ensure content isn't cut off */}
+                <div className="h-8"></div>
               </div>
             </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
@@ -1721,6 +1694,67 @@ const WorkflowBuilder = () => {
           <div>Press <kbd className="px-2 py-1 bg-gray-100 rounded">Esc</kbd> to cancel</div>
         </div>
       </div>
+
+      {/* Naming Dialog */}
+      <AnimatePresence>
+        {showNamingDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Save className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Save Workflow</h3>
+                  <p className="text-sm text-gray-600">Give your workflow a name</p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Workflow Name
+                </label>
+                <input
+                  type="text"
+                  value={tempWorkflowName}
+                  onChange={(e) => setTempWorkflowName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleNamingConfirm();
+                    } else if (e.key === 'Escape') {
+                      setShowNamingDialog(false);
+                    }
+                  }}
+                  placeholder="e.g., Customer Onboarding, Lead Generation"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowNamingDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleNamingConfirm}
+                  disabled={!tempWorkflowName.trim()}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save Workflow
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Toast Notifications */}
       <div className="fixed top-4 right-4 z-50 space-y-2">

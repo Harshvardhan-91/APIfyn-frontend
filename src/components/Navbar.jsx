@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Zap, ArrowRight, Bell, User } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import logo from '../assets/logo.png'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -87,8 +88,8 @@ const Navbar = () => {
             className="flex items-center space-x-3 cursor-pointer"
           >
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <Zap className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25 overflow-hidden">
+                <img src={logo} alt="APIfyn Logo" className="w-8 h-8 object-contain" />
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import WebhookSetup from '../components/WebhookSetup';
 import { 
   ArrowLeft, 
   Play, 
@@ -390,6 +391,11 @@ const WorkflowDetail = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Webhook Setup Section */}
+        <div className="mt-8">
+          <WebhookSetup workflow={workflow} />
         </div>
       </div>
     </div>

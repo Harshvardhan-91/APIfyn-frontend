@@ -1,6 +1,7 @@
 import React from 'react'
 import { Twitter, Github, Linkedin, Mail, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import logo from '../assets/logo.png'
 
 const Footer = () => {
   const footerLinks = [
@@ -26,8 +27,8 @@ const Footer = () => {
           <div className="flex items-start space-x-4">
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Zap className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                  <img src={logo} alt="APIfyn Logo" className="w-8 h-8 object-contain" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
