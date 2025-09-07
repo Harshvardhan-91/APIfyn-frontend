@@ -75,8 +75,6 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [user]);
 
-
-
   const getActivityIcon = (type, status) => {
     if (status === 'failed') {
       return <AlertCircle className="w-5 h-5 text-red-500" />;
@@ -299,11 +297,11 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Main Content - Now balanced 1:1 instead of 2:1 */}
+        {/* Main Content - Independent sections with fixed height */}
         <div className="grid lg:grid-cols-2 gap-6">
           
-          {/* Recent Activity */}
-          <div className="bg-white rounded-xl border border-gray-200">
+          {/* Recent Activity - Fixed height, no scroll */}
+          <div className="bg-white rounded-xl border border-gray-200 h-96">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-gray-700" />
@@ -314,9 +312,9 @@ const Dashboard = () => {
               </button>
             </div>
             
-            <div className="p-4">
+            <div className="p-4 overflow-hidden">
               <div className="space-y-3">
-                {dashboardData?.recentActivity?.map((activity) => (
+                {dashboardData?.recentActivity?.slice(0, 4).map((activity) => ( // Limit to 4 items to fit height
                   <div 
                     key={activity.id} 
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
@@ -349,54 +347,56 @@ const Dashboard = () => {
           {/* Right Column - Stacked sections */}
           <div className="space-y-6">
             
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center gap-2 mb-4">
+            {/* Quick Actions - Fixed height, no scroll */}
+            <div className="bg-white rounded-xl border border-gray-200 h-96">
+              <div className="flex items-center gap-2 mb-4 p-4">
                 <Zap className="w-5 h-5 text-indigo-600" />
                 <h3 className="font-semibold text-gray-900">Quick Actions</h3>
               </div>
-              <div className="space-y-2">
-                <button 
-                  onClick={() => navigate('/workflows/create')}
-                  className="w-full flex items-center gap-3 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group"
-                >
-                  <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                    <Plus className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-medium text-indigo-900">Create Workflow</p>
-                    <p className="text-xs text-indigo-600">Build new automation</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-indigo-400" />
-                </button>
-                
-                <button 
-                  onClick={() => navigate('/integrations')}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
-                >
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Link2 className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-medium text-gray-900">Connect Apps</p>
-                    <p className="text-xs text-gray-500">Add integrations</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </button>
-                
-                <button 
-                  onClick={() => navigate('/analytics')}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
-                >
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-medium text-gray-900">View Analytics</p>
-                    <p className="text-xs text-gray-500">Performance insights</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </button>
+              <div className="p-4 overflow-hidden">
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => navigate('/workflows/create')}
+                    className="w-full flex items-center gap-3 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group"
+                  >
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-indigo-900">Create Workflow</p>
+                      <p className="text-xs text-indigo-600">Build new automation</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-indigo-400" />
+                  </button>
+                  
+                  <button 
+                    onClick={() => navigate('/integrations')}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
+                  >
+                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <Link2 className="w-4 h-4 text-gray-600" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-gray-900">Connect Apps</p>
+                      <p className="text-xs text-gray-500">Add integrations</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                  
+                  <button 
+                    onClick={() => navigate('/analytics')}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
+                  >
+                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 text-gray-600" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-gray-900">View Analytics</p>
+                      <p className="text-xs text-gray-500">Performance insights</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -88,65 +88,7 @@ const Features = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
-        >
-          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4" />
-            <span>Trusted by 50,000+ teams</span>
-          </div>
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-            Features that <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">scale</span> with your business
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Everything you need to automate workflows, boost productivity, and grow faster. 
-            Built for teams that demand excellence.
-          </p>
-        </motion.div>
-
-        {/* Main Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
-          {mainFeatures.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              onHoverStart={() => setHoveredFeature(index)}
-              onHoverEnd={() => setHoveredFeature(null)}
-              className="group relative"
-            >
-              <div className={`relative ${feature.bgColor} rounded-3xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2`}>
-                {/* Icon */}
-                <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {feature.description}
-                </p>
-
-                {/* Metrics */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div>
-                    <div className="text-2xl font-bold text-gray-900">{feature.metric}</div>
-                    <div className="text-sm text-gray-500">{feature.metricLabel}</div>
-                  </div>
-                  <div className={`text-sm font-medium px-3 py-1 rounded-full bg-gradient-to-r ${feature.color} text-white`}>
-                    {feature.stats}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+       
 
         {/* Workflow Dashboard Section */}
         <motion.div

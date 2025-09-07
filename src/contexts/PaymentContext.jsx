@@ -12,7 +12,7 @@ export const usePayment = () => {
 };
 
 export const PaymentProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshToken } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPlan, setCurrentPlan] = useState(null);
@@ -34,18 +34,34 @@ export const PaymentProvider = ({ children }) => {
       // Load Razorpay script
       await loadRazorpay();
 
+      // Get a fresh token before making the request
+      const freshToken = await refreshToken();
+
       // Create subscription on backend
+      console.log('Creating subscription with:', {
+        planId,
+        interval,
+        userToken: freshToken ? 'Fresh token obtained' : 'No token',
+        userEmail: user?.email
+      });
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.idToken}`
+          'Authorization': `Bearer ${freshToken}`
         },
         body: JSON.stringify({ planId, interval })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create subscription');
+        const errorData = await response.text();
+        console.error('Subscription creation failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        throw new Error(`Failed to create subscription: ${response.status} ${response.statusText}`);
       }
 
       const { subscription, razorpayKey } = await response.json();

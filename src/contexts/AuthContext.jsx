@@ -131,10 +131,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshToken = async () => {
+    if (auth.currentUser) {
+      try {
+        // Force refresh the token
+        const idToken = await auth.currentUser.getIdToken(true);
+        // Update the user object with the new token
+        setUser(prev => ({
+          ...prev,
+          idToken
+        }));
+        return idToken;
+      } catch (error) {
+        console.error('Error refreshing token:', error);
+        throw error;
+      }
+    }
+    throw new Error('No authenticated user found');
+  };
+
   const value = {
     user,
     login,
     logout,
+    refreshToken,
     loading,
     error
   };

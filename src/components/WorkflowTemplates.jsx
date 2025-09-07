@@ -239,46 +239,7 @@ const WorkflowTemplates = () => {
             </motion.div>
           ))}
         </div>
-
-        {/* Bottom CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-12 text-white overflow-hidden"
-        >
-          {/* Background Elements */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-sm" />
-          <div className="absolute top-0 left-0 w-full h-full opacity-10">
-            <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full blur-xl" />
-            <div className="absolute bottom-10 right-10 w-32 h-32 bg-white rounded-full blur-xl" />
-          </div>
-
-          <div className="relative z-10 text-center">
-            <h3 className="text-2xl lg:text-3xl font-bold mb-6">
-              Can't Find What You're Looking For?
-            </h3>
-            <p className="text-blue-100 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Browse our complete template library with 100+ ready-to-use workflows for marketing, e-commerce, content creation, and more.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all duration-300"
-              >
-                Browse All Templates
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-blue-600 transition-all duration-300"
-              >
-                Create Custom Workflow
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
+        
       </div>
     </section>
   )
