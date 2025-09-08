@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+
 import { 
   Plus, 
   Search, 
@@ -14,47 +14,14 @@ import {
   AlertCircle,
   Users
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Workflows = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [workflows, setWorkflows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [workflows] = useState([]);
+  const [loading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  // Fetch workflows from backend
-  useEffect(() => {
-    const fetchWorkflows = async () => {
-      if (!user?.idToken) return;
-      
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
-          headers: {
-            'Authorization': `Bearer ${user.idToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            setWorkflows(result.workflows);
-          }
-        } else {
-          console.error('Failed to fetch workflows:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching workflows:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWorkflows();
-  }, [user]);
 
   // Process workflows to ensure all required fields exist
   const processedWorkflows = workflows.map(workflow => ({
@@ -129,15 +96,13 @@ const Workflows = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Workflows</h1>
               <p className="text-gray-600">Manage and monitor your automation workflows</p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={() => navigate('/workflows/create')}
               className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Plus className="w-5 h-5" />
               Create Workflow
-            </motion.button>
+            </button>
           </div>
         </div>
 
@@ -172,12 +137,9 @@ const Workflows = () => {
 
         {/* Workflows Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredWorkflows.map((workflow, index) => (
-            <motion.div
+          {filteredWorkflows.map((workflow) => (
+            <div
               key={workflow.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
               className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
               onClick={() => navigate(`/workflows/${workflow.id}`)}
             >
@@ -250,7 +212,7 @@ const Workflows = () => {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -267,15 +229,13 @@ const Workflows = () => {
                 : 'Create your first workflow to get started with automation'
               }
             </p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={() => navigate('/workflows/create')}
               className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl mx-auto"
             >
               <Plus className="w-5 h-5" />
               Create Your First Workflow
-            </motion.button>
+            </button>
           </div>
         )}
       </div>

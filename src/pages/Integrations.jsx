@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+
 import { 
   Search, 
   Filter, 
@@ -19,44 +19,12 @@ import {
   CreditCard,
   Globe
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 const Integrations = () => {
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [connectedIntegrations, setConnectedIntegrations] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch connected integrations from backend
-  useEffect(() => {
-    const fetchIntegrations = async () => {
-      if (!user?.idToken) return;
-      
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration`, {
-          headers: {
-            'Authorization': `Bearer ${user.idToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            setConnectedIntegrations(result.integrations || []);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching integrations:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchIntegrations();
-  }, [user]);
+  const [connectedIntegrations] = useState([]);
 
   const handleConnect = async (integrationName) => {
     try {
@@ -199,9 +167,8 @@ const Integrations = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Popular Integrations</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {popularIntegrations.map((integration) => (
-                <motion.div
+                <div
                   key={integration.id}
-                  whileHover={{ scale: 1.02 }}
                   className="bg-white rounded-xl p-4 border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -215,16 +182,14 @@ const Integrations = () => {
                         <span className="text-sm text-gray-600">{integration.rating}</span>
                       </div>
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                     >
                       Connect
-                    </motion.button>
+                    </button>
                   </div>
                   <p className="text-sm text-gray-600">{integration.description}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -268,12 +233,9 @@ const Integrations = () => {
 
         {/* Integrations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredIntegrations.map((integration, index) => (
-            <motion.div
+          {filteredIntegrations.map((integration) => (
+            <div
               key={integration.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
               className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-4">
@@ -313,26 +275,22 @@ const Integrations = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   {integration.connected ? (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       <Settings className="w-4 h-4" />
-                    </motion.button>
+                    </button>
                   ) : (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       onClick={() => handleConnect(integration.name.toLowerCase())}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                     >
                       Connect
-                    </motion.button>
+                    </button>
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
