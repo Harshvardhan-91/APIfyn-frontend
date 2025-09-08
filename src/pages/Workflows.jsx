@@ -133,7 +133,7 @@ const Workflows = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate('/workflows/create')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Plus className="w-5 h-5" />
               Create Workflow
@@ -221,7 +221,7 @@ const Workflows = () => {
                   {(workflow.apps || []).slice(0, 3).map((app, i) => (
                     <div
                       key={i}
-                      className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-2 border-white flex items-center justify-center"
+                      className="w-6 h-6 bg-gray-100 rounded-full border-2 border-white flex items-center justify-center"
                     >
                       <span className="text-white text-xs font-bold">{app.charAt(0)}</span>
                     </div>
@@ -271,7 +271,7 @@ const Workflows = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate('/workflows/create')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl mx-auto"
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl mx-auto"
             >
               <Plus className="w-5 h-5" />
               Create Your First Workflow

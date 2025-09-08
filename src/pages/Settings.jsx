@@ -40,7 +40,7 @@ const Settings = () => {
     // Fetch user settings
     const fetchSettings = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/user/settings', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/settings`, {
           headers: {
             'Authorization': `Bearer ${user?.idToken}`,
           },
@@ -62,7 +62,7 @@ const Settings = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/user/settings', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/settings`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${user?.idToken}`,
@@ -200,8 +200,8 @@ const Settings = () => {
           {/* Preferences */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Globe className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <Globe className="w-5 h-5 text-gray-600" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Preferences</h2>

@@ -88,18 +88,18 @@ const WorkflowBuilder = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  // Block Library with real logos and integration requirements
+  // Block Library with only GitHub, Slack, Gmail, Notion, Google Sheets
   const blockLibrary = {
     triggers: [
       { 
-        id: 'typeform-trigger', 
-        name: 'Typeform Submission', 
-        icon: <img src="https://images.typeform.com/images/2dpnUBBkz2VN" alt="Typeform" className="w-5 h-5 rounded" />, 
-        color: 'bg-blue-50', 
-        description: 'Triggered when a new form is submitted',
+        id: 'github-trigger', 
+        name: 'GitHub Push', 
+        icon: <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" className="w-5 h-5 rounded" />, 
+        color: 'bg-gray-50', 
+        description: 'Triggered when code is pushed to repository',
         integrationRequired: true,
         integrationStatus: 'not-connected',
-        category: 'Forms'
+        category: 'Developer Tools'
       },
       { 
         id: 'gmail-trigger', 
@@ -112,44 +112,34 @@ const WorkflowBuilder = () => {
         category: 'Email'
       },
       { 
-        id: 'stripe-trigger', 
-        name: 'Stripe Payment', 
-        icon: <div className="w-5 h-5 bg-purple-600 rounded flex items-center justify-center text-white font-bold text-xs">S</div>, 
-        color: 'bg-purple-50', 
-        description: 'Triggered when a payment is made',
-        integrationRequired: true,
-        integrationStatus: 'not-connected',
-        category: 'Payments'
-      },
-      { 
-        id: 'webhook-trigger', 
-        name: 'Webhook', 
-        icon: <Webhook className="w-5 h-5" />, 
-        color: 'bg-gray-100 text-gray-600', 
-        description: 'Triggered when webhook receives data',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Developer Tools'
-      },
-      { 
-        id: 'calendar-trigger', 
-        name: 'Google Calendar', 
-        icon: <img src="https://ssl.gstatic.com/calendar/images/favicon_v2014_26.ico" alt="Google Calendar" className="w-5 h-5 rounded" />, 
-        color: 'bg-blue-50', 
-        description: 'Triggered when calendar event occurs',
-        integrationRequired: true,
-        integrationStatus: 'not-connected',
-        category: 'Calendar'
-      },
-      { 
         id: 'slack-trigger', 
         name: 'Slack Message', 
         icon: <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" className="w-5 h-5 rounded" />, 
-        color: 'bg-purple-50', 
+        color: 'bg-slate-50', 
         description: 'Triggered when Slack message is received',
         integrationRequired: true,
         integrationStatus: 'not-connected',
         category: 'Communication'
+      },
+      { 
+        id: 'sheets-trigger', 
+        name: 'Google Sheets Row', 
+        icon: <img src="https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png" alt="Google Sheets" className="w-5 h-5 rounded" />, 
+        color: 'bg-green-50', 
+        description: 'Triggered when a new row is added to Google Sheets',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Productivity'
+      },
+      { 
+        id: 'notion-trigger', 
+        name: 'Notion Database', 
+        icon: <img src="https://www.notion.so/images/favicon.ico" alt="Notion" className="w-5 h-5 rounded" />, 
+        color: 'bg-gray-50', 
+        description: 'Triggered when a new page is added to Notion database',
+        integrationRequired: true,
+        integrationStatus: 'not-connected',
+        category: 'Productivity'
       }
     ],
     actions: [
@@ -167,7 +157,7 @@ const WorkflowBuilder = () => {
         id: 'slack-send', 
         name: 'Send Slack Message', 
         icon: <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" className="w-5 h-5 rounded" />, 
-        color: 'bg-purple-50', 
+        color: 'bg-slate-50', 
         description: 'Send a message to Slack channel',
         integrationRequired: true,
         integrationStatus: 'not-connected',
@@ -175,7 +165,7 @@ const WorkflowBuilder = () => {
       },
       { 
         id: 'sheets-add', 
-        name: 'Google Sheets', 
+        name: 'Add to Google Sheets', 
         icon: <img src="https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png" alt="Google Sheets" className="w-5 h-5 rounded" />, 
         color: 'bg-green-50', 
         description: 'Add row to Google Sheets',
@@ -185,7 +175,7 @@ const WorkflowBuilder = () => {
       },
       { 
         id: 'notion-create', 
-        name: 'Notion', 
+        name: 'Create Notion Page', 
         icon: <img src="https://www.notion.so/images/favicon.ico" alt="Notion" className="w-5 h-5 rounded" />, 
         color: 'bg-gray-50', 
         description: 'Create a new Notion page',
@@ -194,100 +184,24 @@ const WorkflowBuilder = () => {
         category: 'Productivity'
       },
       { 
-        id: 'webhook-send', 
-        name: 'Send Webhook', 
-        icon: <Webhook className="w-5 h-5" />, 
-        color: 'bg-blue-100 text-blue-600', 
-        description: 'Send data to webhook URL',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Developer Tools'
-      },
-      { 
-        id: 'discord-send', 
-        name: 'Discord', 
-        icon: <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-xs">D</div>, 
-        color: 'bg-indigo-50', 
-        description: 'Send message to Discord channel',
+        id: 'github-issue', 
+        name: 'Create GitHub Issue', 
+        icon: <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" className="w-5 h-5 rounded" />, 
+        color: 'bg-gray-50', 
+        description: 'Create a new issue in GitHub repository',
         integrationRequired: true,
         integrationStatus: 'not-connected',
-        category: 'Communication'
-      }
-    ],
-    conditions: [
-      { 
-        id: 'if-condition', 
-        name: 'If/Then Logic', 
-        icon: <div className="w-5 h-5 bg-yellow-500 rounded flex items-center justify-center text-white font-bold text-xs">?</div>, 
-        color: 'bg-yellow-50', 
-        description: 'Add conditional logic to your workflow',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Logic'
-      },
-      { 
-        id: 'filter', 
-        name: 'Data Filter', 
-        icon: <Filter className="w-5 h-5" />, 
-        color: 'bg-orange-100 text-orange-600', 
-        description: 'Filter data based on conditions',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Logic'
-      },
-      { 
-        id: 'switch', 
-        name: 'Multi-path Switch', 
-        icon: <div className="w-5 h-5 bg-pink-500 rounded flex items-center justify-center text-white font-bold text-xs">◊</div>, 
-        color: 'bg-pink-50', 
-        description: 'Route data based on multiple conditions',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Logic'
-      }
-    ],
-    utilities: [
-      { 
-        id: 'delay', 
-        name: 'Delay Timer', 
-        icon: <Clock className="w-5 h-5" />, 
-        color: 'bg-gray-100 text-gray-600', 
-        description: 'Add time delay before next action',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Utility'
-      },
-      { 
-        id: 'formatter', 
-        name: 'Data Formatter', 
-        icon: <div className="w-5 h-5 bg-teal-500 rounded flex items-center justify-center text-white font-bold text-xs">{ }</div>, 
-        color: 'bg-teal-50', 
-        description: 'Transform and format data',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Utility'
-      },
-      { 
-        id: 'code', 
-        name: 'Custom Code', 
-        icon: <Code className="w-5 h-5" />, 
-        color: 'bg-indigo-100 text-indigo-600', 
-        description: 'Execute custom JavaScript code',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Utility'
-      },
-      { 
-        id: 'logger', 
-        name: 'Debug Logger', 
-        icon: <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white font-bold text-xs">📋</div>, 
-        color: 'bg-blue-50', 
-        description: 'Log data for debugging and monitoring',
-        integrationRequired: false,
-        integrationStatus: 'ready',
-        category: 'Utility'
+        category: 'Developer Tools'
       }
     ]
+  };
+
+  // Track expanded categories
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   const handleSave = useCallback(async () => {
@@ -462,13 +376,6 @@ const WorkflowBuilder = () => {
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, [isConnecting, connectionStart, canvasPosition, zoom]);
-
-  const toggleCategory = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
 
   const handleDragStart = (e, blockType) => {
     setDraggedBlock(blockType);
@@ -755,7 +662,7 @@ const WorkflowBuilder = () => {
               </svg>
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -1000,11 +907,8 @@ const WorkflowBuilder = () => {
               {blocks.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center max-w-lg">
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
-                      <Zap className="w-12 h-12 text-white" />
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6">Build Your First Workflow</h3>
-                    <p className="text-lg text-gray-600 mb-10 leading-relaxed">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Build Your First Workflow</h3>
+                    <p className="text-base text-gray-600 mb-8 leading-relaxed">
                       Start by dragging blocks from the left sidebar to create powerful automations
                     </p>
                     <div className="grid grid-cols-1 gap-4 text-left bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
@@ -1027,8 +931,8 @@ const WorkflowBuilder = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Link className="w-5 h-5 text-purple-600" />
+                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <MousePointer className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
                           <div className="font-semibold text-gray-900">Connect Blocks</div>
@@ -1166,7 +1070,7 @@ const WorkflowBuilder = () => {
 
               {/* Global Connection Mode Indicator */}
               {isConnecting && (
-                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-2xl z-50 animate-pulse">
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl z-50 animate-pulse">
                   <div className="flex items-center gap-3">
                     <MousePointer className="w-5 h-5" />
                     <span className="font-semibold">Connection Mode Active</span>
@@ -1245,7 +1149,7 @@ const WorkflowBuilder = () => {
 
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto bg-gray-50">
-                <div className="p-6 space-y-6">
+                <div className="p-8 space-y-8">
                   {/* Integration Status & Authorization */}
                   {selectedBlock.integrationRequired && (
                     <div className={`p-6 rounded-xl border-2 ${
@@ -1359,7 +1263,7 @@ const WorkflowBuilder = () => {
                               showToast(`Authorization failed: ${error.message}`, 'error');
                             }
                           }}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2 font-medium"
+                          className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 font-medium"
                         >
                           <Link className="w-5 h-5" />
                           Authorize {selectedBlock.name}
@@ -1393,8 +1297,9 @@ const WorkflowBuilder = () => {
                 )}
               </div>
                   
-                  <div className="mx-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                  {/* Block Name Configuration */}
+                  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <label className="block text-sm font-semibold text-gray-900 mb-3">
                       Block Name
                     </label>
                     <input
@@ -1408,52 +1313,57 @@ const WorkflowBuilder = () => {
                         ));
                         setSelectedBlock(prev => ({ ...prev, name: e.target.value }));
                       }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white transition-colors"
+                      placeholder="Enter block name..."
                     />
                   </div>
 
+                {/* Gmail Send Configuration */}
                 {selectedBlock.type === 'gmail-send' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Gmail Account
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select Gmail Account</option>
-                        <option value="primary">Primary Gmail Account</option>
-                        <option value="custom">Connect New Account</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        To Email
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="recipient@example.com or {{trigger.email}}"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Use {`{trigger.fieldname}`} for dynamic data</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Subject
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Welcome {{trigger.name}}!"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message
-                      </label>
-                      <textarea
-                        rows="4"
-                        placeholder="Hi {{trigger.name}}, welcome to our platform! Your email: {{trigger.email}}"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      />
+                  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-6">Gmail Configuration</h4>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Gmail Account
+                        </label>
+                        <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                          <option value="">Select Gmail Account</option>
+                          <option value="primary">Primary Gmail Account</option>
+                          <option value="custom">Connect New Account</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          To Email
+                        </label>
+                        <input
+                          type="email"
+                          placeholder="recipient@example.com or {{trigger.email}}"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                        <p className="text-xs text-gray-600 mt-2">Use {`{{trigger.fieldname}}`} for dynamic data</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Subject
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Welcome {{trigger.name}}!"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Message
+                        </label>
+                        <textarea
+                          rows="4"
+                          placeholder="Hi {{trigger.name}}, welcome to our platform! Your email: {{trigger.email}}"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1538,58 +1448,62 @@ const WorkflowBuilder = () => {
                   </div>
                 )}
 
+                {/* Typeform Trigger Configuration */}
                 {selectedBlock.type === 'typeform-trigger' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Typeform Form
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select a form</option>
-                        <option value="connect">Connect Typeform Account</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Form ID (Alternative)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="abc123def"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Find this in your Typeform URL: typeform.com/to/<strong>abc123def</strong></p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Webhook URL (Generated)
-                      </label>
-                      <div className="bg-gray-50 p-3 rounded-lg border">
-                        <code className="text-sm text-gray-600 break-all">
-                          https://api.apifyn.com/webhooks/typeform/{selectedBlock.id}
-                        </code>
-                        <button className="ml-2 text-blue-600 hover:text-blue-800 text-xs">Copy</button>
+                  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-6">Typeform Configuration</h4>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Typeform Form
+                        </label>
+                        <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white">
+                          <option value="">Select a form</option>
+                          <option value="connect">Connect Typeform Account</option>
+                        </select>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Add this URL to your Typeform webhook settings</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expected Fields
-                      </label>
-                      <div className="space-y-2">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Form ID (Alternative)
+                        </label>
                         <input
                           type="text"
-                          placeholder="name"
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          placeholder="abc123def"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         />
-                        <input
-                          type="text"
-                          placeholder="email"
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">+ Add Field</button>
+                        <p className="text-xs text-gray-600 mt-2">Find this in your Typeform URL: typeform.com/to/<strong>abc123def</strong></p>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Define fields that will be available as {`{trigger.fieldname}`}</p>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Webhook URL (Generated)
+                        </label>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <code className="text-sm text-gray-700 break-all font-mono">
+                            https://api.apifyn.com/webhooks/typeform/{selectedBlock.id}
+                          </code>
+                          <button className="ml-3 text-blue-600 hover:text-blue-800 text-xs font-medium">Copy</button>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-2">Add this URL to your Typeform webhook settings</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Expected Fields
+                        </label>
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            placeholder="name"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          />
+                          <input
+                            type="text"
+                            placeholder="email"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          />
+                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">+ Add Field</button>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-2">Define fields that will be available as {`{{trigger.fieldname}}`}</p>
+                      </div>
                     </div>
                   </div>
                 )}

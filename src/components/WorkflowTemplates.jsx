@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { ArrowRight, Play, Clock, Users, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, Play, Clock, Users, Zap } from 'lucide-react'
 
 const WorkflowTemplates = () => {
   const ref = useRef(null)
@@ -10,58 +10,28 @@ const WorkflowTemplates = () => {
 
   const templates = [
     {
-      title: "Reddit → OpenAI → Gmail",
-      description: "Monitor Reddit posts, analyze sentiment with AI, and get email alerts for positive mentions of your brand.",
-      category: "Social Monitoring",
+      title: "GitHub → Slack",
+      description: "Get instant Slack notifications when code is pushed to your GitHub repository. Perfect for keeping your team updated on development progress.",
+      category: "Developer Tools",
       time: "2 mins setup",
-      users: "1.2k users",
-      gradient: "from-orange-500 via-red-500 to-pink-500",
+      users: "1.8k users",
+      gradient: "from-gray-800 via-gray-700 to-gray-900",
       steps: [
-        { name: "Reddit", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/reddit.svg", color: "#FF4500" },
-        { name: "OpenAI", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/openai.svg", color: "#412991" },
-        { name: "Gmail", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/gmail.svg", color: "#EA4335" }
+        { name: "GitHub", logo: "https://github.githubassets.com/favicons/favicon.svg", color: "#24292e" },
+        { name: "Slack", logo: "https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png", color: "#4A154B" }
       ],
       popular: true
     },
     {
-      title: "Shopify → Google Sheets → Drive",
-      description: "Automatically log new orders in Google Sheets and upload invoices to organized Drive folders.",
-      category: "E-commerce",
+      title: "Notion → Google Sheets",
+      description: "Automatically sync new Notion database entries to Google Sheets for easier data analysis and reporting.",
+      category: "Productivity",
       time: "3 mins setup",
-      users: "850 users",
-      gradient: "from-green-500 via-emerald-500 to-teal-500",
+      users: "1.2k users",
+      gradient: "from-slate-800 via-slate-700 to-slate-900",
       steps: [
-        { name: "Shopify", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/shopify.svg", color: "#7AB55C" },
-        { name: "Sheets", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/googlesheets.svg", color: "#34A853" },
-        { name: "Drive", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/googledrive.svg", color: "#4285F4" }
-      ],
-      popular: false
-    },
-    {
-      title: "Typeform → HubSpot → Slack",
-      description: "Capture form leads, add them to your CRM, and notify your sales team instantly via Slack.",
-      category: "Lead Generation",
-      time: "2 mins setup",
-      users: "2.1k users",
-      gradient: "from-blue-500 via-cyan-500 to-indigo-500",
-      steps: [
-        { name: "Typeform", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/typeform.svg", color: "#262627" },
-        { name: "HubSpot", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/hubspot.svg", color: "#FF7A59" },
-        { name: "Slack", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/slack.svg", color: "#4A154B" }
-      ],
-      popular: true
-    },
-    {
-      title: "Twitter → Slack → Notion",
-      description: "Track brand mentions on Twitter, post to Slack channel, and log everything in a Notion database.",
-      category: "Social Media",
-      time: "1 min setup",
-      users: "950 users",
-      gradient: "from-purple-500 via-pink-500 to-rose-500",
-      steps: [
-        { name: "Twitter", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/twitter.svg", color: "#1DA1F2" },
-        { name: "Slack", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/slack.svg", color: "#4A154B" },
-        { name: "Notion", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/notion.svg", color: "#000000" }
+        { name: "Notion", logo: "https://www.notion.so/images/favicon.ico", color: "#000000" },
+        { name: "Google Sheets", logo: "https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png", color: "#34A853" }
       ],
       popular: false
     }
@@ -94,7 +64,7 @@ const WorkflowTemplates = () => {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-purple-100"
           >
-            <Sparkles size={16} />
+            <Zap size={16} />
             <span>Ready-to-Use Templates</span>
           </motion.div>
 

@@ -128,8 +128,8 @@ const Features = () => {
               </div>
               
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Globe className="w-5 h-5 text-purple-600" />
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Globe className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Global deployment</h3>
@@ -141,7 +141,7 @@ const Features = () => {
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center gap-2"
+              className="mt-8 bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center gap-2"
             >
               <span>Explore Dashboard</span>
               <ArrowRight className="w-5 h-5" />

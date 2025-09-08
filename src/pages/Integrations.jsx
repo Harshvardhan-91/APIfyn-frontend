@@ -75,113 +75,62 @@ const Integrations = () => {
       id: 'gmail',
       name: "Gmail",
       description: "Send and receive emails automatically",
-      icon: <Mail className="w-6 h-6" />,
+      icon: <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" alt="Gmail" className="w-6 h-6" />,
       category: "Email",
       popular: true,
       rating: 4.8,
-      color: "bg-red-100 text-red-600"
+      color: "bg-red-50 text-red-600"
     },
     {
       id: 'slack',
       name: "Slack",
       description: "Send messages and notifications to channels",
-      icon: <MessageSquare className="w-6 h-6" />,
+      icon: <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" className="w-6 h-6" />,
       category: "Communication",
       popular: true,
       rating: 4.9,
-      color: "bg-purple-100 text-purple-600"
+      color: "bg-purple-50 text-purple-600"
     },
     {
       id: 'google-sheets',
       name: "Google Sheets",
       description: "Create, update, and manage spreadsheets",
-      icon: <FileText className="w-6 h-6" />,
+      icon: <img src="https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png" alt="Google Sheets" className="w-6 h-6" />,
       category: "Productivity",
       popular: true,
       rating: 4.7,
-      color: "bg-green-100 text-green-600"
-    },
-    {
-      id: 'typeform',
-      name: "Typeform",
-      description: "Collect and process form submissions",
-      icon: <FileText className="w-6 h-6" />,
-      category: "Forms",
-      popular: true,
-      rating: 4.6,
-      color: "bg-blue-100 text-blue-600"
-    },
-    {
-      id: 'hubspot',
-      name: "HubSpot",
-      description: "Manage contacts, deals, and marketing campaigns",
-      icon: <Database className="w-6 h-6" />,
-      category: "CRM",
-      popular: true,
-      rating: 4.5,
-      color: "bg-orange-100 text-orange-600"
-    },
-    {
-      id: 'stripe',
-      name: "Stripe",
-      description: "Process payments and manage subscriptions",
-      icon: <CreditCard className="w-6 h-6" />,
-      category: "Payment",
-      popular: true,
-      rating: 4.8,
-      color: "bg-indigo-100 text-indigo-600"
+      color: "bg-green-50 text-green-600"
     },
     {
       id: 'notion',
       name: "Notion",
-      description: "Create and update database entries",
-      icon: <Database className="w-6 h-6" />,
+      description: "Create and manage databases and pages",
+      icon: <img src="https://www.notion.so/images/favicon.ico" alt="Notion" className="w-6 h-6" />,
       category: "Productivity",
       popular: false,
-      rating: 4.4,
-      color: "bg-gray-100 text-gray-600"
-    },
-    {
-      id: 'twitter',
-      name: "Twitter",
-      description: "Post tweets and monitor mentions",
-      icon: <Globe className="w-6 h-6" />,
-      category: "Social Media",
-      popular: false,
-      rating: 4.3,
-      color: "bg-sky-100 text-sky-600"
-    },
-    {
-      id: 'google-drive',
-      name: "Google Drive",
-      description: "Upload, organize, and share files",
-      icon: <Cloud className="w-6 h-6" />,
-      category: "Storage",
-      popular: false,
       rating: 4.6,
-      color: "bg-yellow-100 text-yellow-600"
+      color: "bg-gray-50 text-gray-600"
     },
     {
-      id: 'calendly',
-      name: "Calendly",
-      description: "Schedule meetings and appointments",
-      icon: <Calendar className="w-6 h-6" />,
-      category: "Scheduling",
+      id: 'github',
+      name: "GitHub",
+      description: "Monitor repositories and manage issues",
+      icon: <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" className="w-6 h-6" />,
+      category: "Developer Tools",
       popular: false,
-      rating: 4.7,
-      color: "bg-teal-100 text-teal-600"
+      rating: 4.8,
+      color: "bg-gray-50 text-gray-600"
     }
   ];
 
-  // Merge available integrations with connected status
+  // Filter integrations based on search and filters
   const integrations = availableIntegrations.map(integration => ({
     ...integration,
     connected: connectedIntegrations.some(conn => conn.type === integration.id || conn.name === integration.name)
   }));
 
   const categories = [
-    'all', 'Email', 'Communication', 'Productivity', 'Forms', 'CRM', 
-    'Payment', 'Social Media', 'Storage', 'Scheduling'
+    'all', 'Email', 'Communication', 'Productivity', 'Developer Tools'
   ];
 
   const filteredIntegrations = integrations.filter(integration => {
@@ -233,8 +182,8 @@ const Integrations = () => {
           </div>
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                <Zap className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                <Zap className="w-5 h-5 text-gray-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{integrations.length}</p>

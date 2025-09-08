@@ -29,45 +29,42 @@ const Templates = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterType, setFilterType] = useState('all');
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [templates] = useState([
+    {
+      id: 'github-slack-template',
+      name: 'GitHub → Slack',
+      description: 'Get instant Slack notifications when code is pushed to your GitHub repository. Perfect for keeping your team updated on development progress.',
+      category: 'Developer Tools',
+      type: 'popular',
+      complexity: 'Beginner',
+      setup_time: '2 mins',
+      usage_count: 1800,
+      steps: [
+        { name: "GitHub", logo: "https://github.githubassets.com/favicons/favicon.svg" },
+        { name: "Slack", logo: "https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" }
+      ]
+    },
+    {
+      id: 'notion-sheets-template',
+      name: 'Notion → Google Sheets',
+      description: 'Automatically sync new Notion database entries to Google Sheets for easier data analysis and reporting.',
+      category: 'Productivity',
+      type: 'trending',
+      complexity: 'Intermediate',
+      setup_time: '3 mins',
+      usage_count: 1200,
+      steps: [
+        { name: "Notion", logo: "https://www.notion.so/images/favicon.ico" },
+        { name: "Google Sheets", logo: "https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png" }
+      ]
+    }
+  ]);
+  const [loading] = useState(false);
 
-  // Fetch templates from backend
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      if (!user?.idToken) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/template`, {
-          headers: {
-            'Authorization': `Bearer ${user.idToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            setTemplates(result.templates || []);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching templates:', error);
-        setTemplates([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTemplates();
-  }, [user]);
+  // Static templates instead of fetching from backend
 
   const categories = [
-    'all', 'Customer Success', 'Sales', 'Marketing', 'Finance', 
-    'Productivity', 'Support', 'Content'
+    'all', 'Developer Tools', 'Productivity'
   ];
 
   const types = [
@@ -175,16 +172,16 @@ const Templates = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
-                      {template.apps.slice(0, 3).map((app, i) => (
+                      {template.steps.slice(0, 3).map((step, i) => (
                         <div
                           key={i}
-                          className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-2 border-white flex items-center justify-center"
+                          className="w-6 h-6 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center"
                         >
-                          <span className="text-white text-xs font-bold">{app.charAt(0)}</span>
+                          <img src={step.logo} alt={step.name} className="w-4 h-4 rounded" />
                         </div>
                       ))}
                     </div>
-                    <span className="text-sm text-gray-500">{template.apps.length} apps</span>
+                    <span className="text-sm text-gray-500">{template.steps.length} apps</span>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -319,21 +316,21 @@ const Templates = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
-                    {template.apps.slice(0, 3).map((app, i) => (
+                    {template.steps && template.steps.slice(0, 3).map((step, i) => (
                       <div
                         key={i}
-                        className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-2 border-white flex items-center justify-center"
+                        className="w-6 h-6 bg-gray-100 rounded-full border-2 border-white flex items-center justify-center"
                       >
-                        <span className="text-white text-xs font-bold">{app.charAt(0)}</span>
+                        <img src={step.logo} alt={step.name} className="w-4 h-4 rounded" />
                       </div>
                     ))}
-                    {template.apps.length > 3 && (
+                    {template.steps && template.steps.length > 3 && (
                       <div className="w-6 h-6 bg-gray-300 rounded-full border-2 border-white flex items-center justify-center">
-                        <span className="text-gray-600 text-xs">+{template.apps.length - 3}</span>
+                        <span className="text-gray-600 text-xs">+{template.steps.length - 3}</span>
                       </div>
                     )}
                   </div>
-                  <span className="text-sm text-gray-500">{template.apps.length} apps</span>
+                  <span className="text-sm text-gray-500">{template.steps ? template.steps.length : 0} apps</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <motion.button

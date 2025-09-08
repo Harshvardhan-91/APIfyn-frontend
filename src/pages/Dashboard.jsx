@@ -186,8 +186,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <GitBranch className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <GitBranch className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{dashboardData?.connectedApps || 0}</p>
@@ -205,7 +205,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-orange-600" />
+                  <Zap className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{dashboardData?.thisWeek || 0}</p>
@@ -238,7 +238,7 @@ const Dashboard = () => {
               {dashboardData.plan.type === 'FREE' && (
                 <button 
                   onClick={() => navigate('/pricing')}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   Upgrade Plan
                 </button>
@@ -457,7 +457,7 @@ const Dashboard = () => {
             </div>
 
             {/* Performance Stats */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-4">
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-5 h-5 text-indigo-600" />
                 <h3 className="font-semibold text-gray-900">Performance Insight</h3>

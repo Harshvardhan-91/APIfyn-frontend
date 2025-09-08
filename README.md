@@ -1,15 +1,15 @@
-# 🚀 APIfyn - No-Code API Automation Platform
+# APIfyn - No-Code API Automation Platform
 
 **APIfyn** is a powerful no-code workflow automation platform that enables users to connect multiple APIs, automate business processes, and leverage AI capabilities through an intuitive drag-and-drop interface.
 
-## ✨ Features
+## Features
 
-### 🎨 **Visual Workflow Builder**
+### **Visual Workflow Builder**
 - Drag-and-drop interface for creating automations
 - Connect triggers, actions, conditions, and AI processing blocks
 - Real-time workflow visualization with connection flows
 
-### 🔗 **Extensive Integrations**
+###  **Extensive Integrations**
 - **Email**: Gmail API integration
 - **Communication**: Slack messaging
 - **Data**: Google Sheets, Google Drive
@@ -18,25 +18,25 @@
 - **AI**: OpenAI, Hugging Face sentiment analysis
 - **Custom APIs**: REST API connector for any service
 
-### 🤖 **AI-Powered Processing**
+### **AI-Powered Processing**
 - Sentiment analysis for text processing
 - Keyword extraction from content
 - Automated data categorization
 - Smart routing based on AI insights
 
-### 💳 **Subscription Management**
+### **Subscription Management**
 - Multiple pricing tiers (Free, Pro, Business)
 - Razorpay payment integration
 - Usage-based billing and limits
 - Team management features
 
-### 📊 **Analytics & Monitoring**
+### **Analytics & Monitoring**
 - Real-time execution tracking
 - Success/failure analytics
 - Performance metrics
 - Detailed execution logs
 
-## 🏗️ Architecture
+## Architecture
 
 ### Frontend (React + Vite)
 ```
@@ -58,7 +58,7 @@ server/src/
 └── prisma/           # Database schema and migrations
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -114,7 +114,7 @@ Visit:
 - Backend API: http://localhost:5000
 - Database Studio: `npx prisma studio`
 
-## 🎯 Usage Examples
+## Usage Examples
 
 ### Example 1: Form Submission to Email Workflow
 1. **Create Workflow** in the builder
@@ -140,7 +140,7 @@ Visit:
 3. **Action**: Update inventory sheet
 4. **Action**: Notify team on Slack
 
-## 🔧 API Documentation
+## API Documentation
 
 ### Webhook Endpoints
 ```bash
@@ -167,15 +167,7 @@ curl -X POST http://localhost:5000/api/webhook/test/WORKFLOW_ID \
   }'
 ```
 
-## 💰 Pricing Tiers
-
-| Plan | Price | Workflows | Executions/Month | Features |
-|------|-------|-----------|------------------|----------|
-| **Free** | ₹0 | 2 | 100 | Basic integrations |
-| **Pro** | ₹800 | 50 | 10,000 | Advanced APIs, AI features |
-| **Business** | ₹2,500 | Unlimited | Unlimited | Team features, priority support |
-
-## 🔐 Security Features
+## Security Features
 
 - **Firebase Authentication** for secure user management
 - **API Key Encryption** for stored credentials
@@ -183,7 +175,7 @@ curl -X POST http://localhost:5000/api/webhook/test/WORKFLOW_ID \
 - **OAuth 2.0** for service integrations
 - **Webhook Signature Verification** for external triggers
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 APIfyn-frontend/
@@ -204,7 +196,7 @@ APIfyn-frontend/
 └── setup.sh               # Unix setup script
 ```
 
-## 🛠️ Development
+## Development
 
 ### Adding New Integrations
 1. Add to `IntegrationType` enum in Prisma schema
@@ -224,7 +216,7 @@ APIfyn-frontend/
 3. Create custom prompt templates
 4. Add configuration options
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Environment
 - **Frontend**: Deploy to Vercel/Netlify
@@ -239,36 +231,3 @@ DATABASE_URL=your-production-db-url
 ALLOWED_ORIGINS=https://yourdomain.com
 # Add all other production credentials
 ```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-- **Documentation**: See [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)
-- **Issues**: Create an issue on GitHub
-- **Email**: support@apifyn.com
-
-## 🎉 What's Next?
-
-- [ ] Mobile app for workflow monitoring
-- [ ] Advanced AI workflow suggestions
-- [ ] Enterprise SSO integration
-- [ ] Workflow marketplace and templates
-- [ ] Real-time collaboration features
-- [ ] Advanced analytics and reporting
-
----
-
-**Built with ❤️ by the APIfyn Team**
-
-*Automate your workflows, amplify your productivity.* 🚀

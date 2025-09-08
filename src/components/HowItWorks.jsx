@@ -372,11 +372,11 @@ const HowItWorks = () => {
   )
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden" ref={ref}>
+    <section className="py-24 bg-gray-50 relative overflow-hidden" ref={ref}>
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gray-100 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gray-100 rounded-full opacity-30 blur-3xl"></div>
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -391,17 +391,14 @@ const HowItWorks = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full text-sm font-semibold mb-6 shadow-lg"
+            className="inline-flex items-center space-x-2 bg-gray-900 text-white px-6 py-3 rounded-lg text-sm font-semibold mb-6"
           >
             <Play size={16} />
-            <span>See How It Works</span>
+            <span>How It Works</span>
           </motion.div>
 
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-            Three Steps to{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
-              Automation Success
-            </span>
+            Three Simple Steps to Automation
           </h2>
 
           <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
