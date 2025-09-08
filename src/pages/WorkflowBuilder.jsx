@@ -741,19 +741,81 @@ const WorkflowBuilder = () => {
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Top Toolbar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/workflows')}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Back to workflows"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">
+                  {workflowName || 'Untitled Workflow'}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {blocks.length} blocks • {connections.length} connections
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setZoom(Math.max(0.25, zoom - 0.25))}
+                className="p-2 hover:bg-white rounded-md transition-colors"
+                title="Zoom out"
+              >
+                <ZoomOut className="w-4 h-4 text-gray-600" />
+              </button>
+              <span className="px-3 py-1 text-sm font-medium text-gray-700 min-w-16 text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                onClick={() => setZoom(Math.min(2, zoom + 0.25))}
+                className="p-2 hover:bg-white rounded-md transition-colors"
+                title="Zoom in"
+              >
+                <ZoomIn className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+            
+            {/* Action Buttons */}
+            <button
+              onClick={() => setShowNamingDialog(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Save Workflow
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <div className="flex-1 flex min-h-0">
         {/* Left Sidebar - Block Library */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-          <div className="p-4 border-b border-gray-200 flex-shrink-0">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Block Library</h2>
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 shadow-sm">
+          <div className="p-6 border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-gray-50 to-blue-50">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Block Library</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search blocks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
               />
             </div>
           </div>
@@ -786,31 +848,31 @@ const WorkflowBuilder = () => {
                       exit={{ height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="space-y-2">
+                      <div className="space-y-3 p-4">
                         {blocks.map((block) => (
                           <div
                             key={block.id}
                             draggable
                             onDragStart={(e) => handleDragStart(e, block)}
-                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-move group border-l-3 border-transparent hover:border-blue-400"
+                            className="flex items-start gap-4 p-4 bg-white rounded-xl hover:bg-gray-50 transition-all cursor-move group border-2 border-gray-100 hover:border-blue-300 hover:shadow-md"
                             title={block.description}
                           >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${block.color} flex-shrink-0 shadow-sm`}>
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${block.color} flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}>
                               {block.icon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm font-medium text-gray-900 block">{block.name}</span>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-semibold text-gray-900 text-sm">{block.name}</span>
                                 {block.integrationRequired && (
-                                  <div className={`w-2 h-2 rounded-full ${
+                                  <div className={`w-3 h-3 rounded-full ${
                                     getBlockTypeIntegrationStatus(block.id) === 'connected' ? 'bg-green-500' :
                                     'bg-yellow-500'
-                                  }`} title={`Integration ${getBlockTypeIntegrationStatus(block.id)}`}></div>
+                                  } flex-shrink-0`} title={`Integration ${getBlockTypeIntegrationStatus(block.id)}`}></div>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-500 line-clamp-2 mb-1">{block.description}</p>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed">{block.description}</p>
                               {block.category && (
-                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                                   {block.category}
                                 </span>
                               )}
@@ -840,8 +902,11 @@ const WorkflowBuilder = () => {
               }
             }}
             style={{
-              backgroundImage: `radial-gradient(circle, #e5e7eb 1px, transparent 1px)`,
-              backgroundSize: '20px 20px',
+              backgroundImage: `
+                radial-gradient(circle, #e5e7eb 1px, transparent 1px),
+                linear-gradient(90deg, #f9fafb 0%, #f3f4f6 50%, #f9fafb 100%)
+              `,
+              backgroundSize: '24px 24px, 100% 100%',
               transform: `scale(${zoom}) translate(${canvasPosition.x}px, ${canvasPosition.y}px)`
             }}
           >
@@ -851,6 +916,13 @@ const WorkflowBuilder = () => {
               className="absolute inset-0 w-full h-full pointer-events-none z-10"
               style={{ overflow: 'visible' }}
             >
+              <defs>
+                <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="50%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
               {/* Existing connections */}
               {connections.map((connection) => {
                 const fromBlock = blocks.find(b => b.id === connection.from);
@@ -859,38 +931,45 @@ const WorkflowBuilder = () => {
                 
                 return (
                   <g key={connection.id}>
+                    <defs>
+                      <filter id={`shadow-${connection.id}`}>
+                        <dropShadow dx="0" dy="2" stdDeviation="3" floodColor="#3b82f6" floodOpacity="0.3"/>
+                      </filter>
+                    </defs>
                     <motion.path
                       d={getConnectionPath(fromBlock, toBlock)}
-                      stroke="#3b82f6"
-                      strokeWidth="3"
+                      stroke="url(#connectionGradient)"
+                      strokeWidth="4"
                       fill="none"
                       strokeLinecap="round"
+                      filter={`url(#shadow-${connection.id})`}
                       initial={{ pathLength: 0, opacity: 0 }}
                       animate={{ pathLength: 1, opacity: 1 }}
-                      transition={{ duration: 0.5 }}
-                      className="drop-shadow-sm"
+                      transition={{ duration: 0.8, ease: "easeInOut" }}
+                      className="drop-shadow-lg"
                     />
-                    {/* Arrow head */}
+                    {/* Enhanced Arrow head */}
                     <motion.circle
                       cx={toBlock.position.x}
                       cy={toBlock.position.y + 50}
-                      r="4"
+                      r="6"
                       fill="#3b82f6"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.5 }}
+                      transition={{ duration: 0.3, delay: 0.8 }}
+                      className="drop-shadow-md"
                     />
                     {/* Connection delete button */}
                     <foreignObject
-                      x={(fromBlock.position.x + 200 + toBlock.position.x) / 2 - 12}
-                      y={(fromBlock.position.y + 50 + toBlock.position.y + 50) / 2 - 12}
-                      width="24"
-                      height="24"
+                      x={(fromBlock.position.x + 200 + toBlock.position.x) / 2 - 15}
+                      y={(fromBlock.position.y + 50 + toBlock.position.y + 50) / 2 - 15}
+                      width="30"
+                      height="30"
                       className="pointer-events-auto opacity-0 hover:opacity-100 transition-opacity"
                     >
                       <button
                         onClick={() => deleteConnection(connection.id)}
-                        className="w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs shadow-lg"
+                        className="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs shadow-xl border-2 border-white transition-all hover:scale-110"
                         title="Delete connection"
                       >
                         <X className="w-3 h-3" />
@@ -920,32 +999,41 @@ const WorkflowBuilder = () => {
             <div className="absolute inset-0">
               {blocks.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
-                  <div className="text-center max-w-md">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                      <Zap className="w-10 h-10 text-white" />
+                  <div className="text-center max-w-lg">
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                      <Zap className="w-12 h-12 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Build Your First Workflow</h3>
-                    <p className="text-gray-600 mb-8 leading-relaxed">
-                      Drag blocks from the left sidebar to create your automation workflow
+                    <h3 className="text-3xl font-bold text-gray-900 mb-6">Build Your First Workflow</h3>
+                    <p className="text-lg text-gray-600 mb-10 leading-relaxed">
+                      Start by dragging blocks from the left sidebar to create powerful automations
                     </p>
-                    <div className="space-y-3 text-sm text-gray-500 bg-gray-50 rounded-xl p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <span className="text-blue-600 font-bold">1</span>
+                    <div className="grid grid-cols-1 gap-4 text-left bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <span className="text-blue-600 font-bold text-lg">1</span>
                         </div>
-                        <span>Start with a <strong>Trigger</strong> to begin your workflow</span>
+                        <div>
+                          <div className="font-semibold text-gray-900">Start with a Trigger</div>
+                          <div className="text-sm text-gray-600">Choose what starts your workflow</div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                          <span className="text-green-600 font-bold">2</span>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <span className="text-green-600 font-bold text-lg">2</span>
                         </div>
-                        <span>Add <strong>Actions</strong> to perform tasks</span>
+                        <div>
+                          <div className="font-semibold text-gray-900">Add Actions</div>
+                          <div className="text-sm text-gray-600">Define what happens next</div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <Link className="w-4 h-4 text-purple-600" />
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Link className="w-5 h-5 text-purple-600" />
                         </div>
-                        <span>Click <strong>connection ports</strong> to link blocks together</span>
+                        <div>
+                          <div className="font-semibold text-gray-900">Connect Blocks</div>
+                          <div className="text-sm text-gray-600">Link blocks by clicking connection ports</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -965,27 +1053,27 @@ const WorkflowBuilder = () => {
                     onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
                   >
                     <div className={`
-                      bg-white rounded-2xl border-2 p-4 shadow-lg min-w-[200px] group hover:shadow-xl transition-all relative
-                      ${selectedBlock?.id === block.id ? 'border-blue-500 ring-4 ring-blue-200/50' : 'border-gray-200'}
-                      ${isDraggingBlock && draggedBlockId === block.id ? 'shadow-2xl scale-105' : ''}
+                      bg-white rounded-2xl border-2 p-5 shadow-lg min-w-[220px] group hover:shadow-xl transition-all relative
+                      ${selectedBlock?.id === block.id ? 'border-blue-500 ring-4 ring-blue-200/50 shadow-blue-200/50' : 'border-gray-200 hover:border-gray-300'}
+                      ${isDraggingBlock && draggedBlockId === block.id ? 'shadow-2xl scale-105 rotate-1' : ''}
                     `}>
                       {/* Input Connection Port */}
                       <div
-                        className="connection-port absolute -left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-500 rounded-full border-3 border-white shadow-lg cursor-pointer hover:bg-blue-600 hover:scale-110 transition-all z-30 group"
+                        className="connection-port absolute -left-4 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full border-4 border-white shadow-lg cursor-pointer hover:from-blue-600 hover:to-blue-700 hover:scale-110 transition-all z-30 group flex items-center justify-center"
                         onClick={(e) => isConnecting ? endConnection(block.id, e) : null}
                         title="Input connection point"
                       >
-                        <div className="absolute inset-1 rounded-full bg-blue-400 animate-pulse opacity-60"></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-300 animate-pulse"></div>
                         <div className="absolute -inset-2 rounded-full border-2 border-blue-300 opacity-0 group-hover:opacity-100 animate-ping"></div>
                       </div>
 
                       {/* Output Connection Port */}
                       <div
-                        className="connection-port absolute -right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg cursor-pointer hover:bg-green-600 hover:scale-110 transition-all z-30 group"
+                        className="connection-port absolute -right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full border-4 border-white shadow-lg cursor-pointer hover:from-green-600 hover:to-green-700 hover:scale-110 transition-all z-30 group flex items-center justify-center"
                         onClick={(e) => !isConnecting ? startConnection(block.id, e) : null}
                         title="Output connection point - click to start connecting"
                       >
-                        <div className="absolute inset-1 rounded-full bg-green-400 animate-pulse opacity-60"></div>
+                        <div className="w-2 h-2 rounded-full bg-green-300 animate-pulse"></div>
                         <div className="absolute -inset-2 rounded-full border-2 border-green-300 opacity-0 group-hover:opacity-100 animate-ping"></div>
                       </div>
 
@@ -1109,80 +1197,73 @@ const WorkflowBuilder = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/10 z-30 lg:hidden"
+                className="fixed inset-0 bg-black/20 z-30 lg:hidden"
                 onClick={() => setSelectedBlock(null)}
               />
               
               <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: 400 }}
-                exit={{ width: 0 }}
-                className="bg-white border-l-2 border-gray-200 overflow-hidden flex flex-col h-full shadow-lg relative z-40"
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 400, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="bg-white border-l border-gray-200 overflow-hidden flex flex-col h-full shadow-2xl relative z-40"
               >
-                {/* Prominent Close Button at Top */}
-                <div className="absolute top-3 right-3 z-20">
-                  <button
-                    onClick={() => setSelectedBlock(null)}
-                    className="p-3 bg-white hover:bg-red-50 hover:text-red-600 rounded-full shadow-xl border-2 border-gray-300 transition-all hover:scale-110 hover:border-red-300"
-                    title="Close configuration panel (Press Esc)"
-                  >
-                    <X className="w-6 h-6 text-gray-700" />
-                  </button>
-                </div>
-              {/* Fixed Header */}
-              <div className="p-6 border-b border-gray-200 flex-shrink-0 bg-white sticky top-0 z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Block Configuration</h3>
-                  <button
-                    onClick={() => setSelectedBlock(null)}
-                    className="p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors flex-shrink-0 border border-gray-300 shadow-sm"
-                    title="Close configuration panel"
-                  >
-                    <X className="w-5 h-5 text-gray-700" />
-                  </button>
-                </div>
-                
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedBlock.color} relative flex-shrink-0`}>
-                    {selectedBlock.icon}
-                    {selectedBlock.integrationRequired && selectedBlock.integrationStatus !== 'connected' && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-white" 
-                           title="Integration required"></div>
-                    )}
+                {/* Fixed Header with Better Close Button */}
+                <div className="p-6 border-b border-gray-200 flex-shrink-0 bg-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-gray-900">Configuration</h3>
+                    <button
+                      onClick={() => setSelectedBlock(null)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+                      title="Close configuration panel (Press Esc)"
+                    >
+                      <X className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
+                    </button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 text-sm truncate">{selectedBlock.name}</h4>
-                    <p className="text-xs text-gray-600 line-clamp-2">{selectedBlock.description}</p>
-                    {selectedBlock.category && (
-                      <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
-                        {selectedBlock.category}
-                      </span>
-                    )}
+                  
+                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedBlock.color} shadow-md relative flex-shrink-0`}>
+                      {selectedBlock.icon}
+                      {selectedBlock.integrationRequired && selectedBlock.integrationStatus !== 'connected' && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-white flex items-center justify-center" 
+                             title="Integration required">
+                          <span className="text-white text-xs font-bold">!</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-gray-900 text-lg truncate">{selectedBlock.name}</h4>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedBlock.description}</p>
+                      {selectedBlock.category && (
+                        <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                          {selectedBlock.category}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
               {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto bg-gray-50">
+                <div className="p-6 space-y-6">
                   {/* Integration Status & Authorization */}
                   {selectedBlock.integrationRequired && (
-                    <div className={`p-5 rounded-xl border-2 mx-2 ${
+                    <div className={`p-6 rounded-xl border-2 ${
                       selectedBlock.integrationStatus === 'connected' 
                         ? 'bg-green-50 border-green-200' 
                         : 'bg-yellow-50 border-yellow-200'
                     }`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full ${
                             selectedBlock.integrationStatus === 'connected' ? 'bg-green-500' : 'bg-yellow-500'
                           }`}></div>
-                          <span className="font-medium text-gray-900 text-sm">
+                          <span className="font-semibold text-gray-900">
                             {selectedBlock.integrationStatus === 'connected' ? 'Integration Connected' : 'Integration Required'}
                           </span>
                         </div>
                         {selectedBlock.integrationStatus === 'connected' && (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <CheckCircle className="w-5 h-5 text-green-600" />
                         )}
                       </div>
                     
