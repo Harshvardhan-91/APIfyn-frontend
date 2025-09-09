@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   BarChart3, 
-  Zap, 
   CheckCircle, 
   Activity,
   TrendingUp,
@@ -17,8 +16,6 @@ import {
   Play,
   Pause,
   AlertCircle,
-  GitBranch,
-  Workflow,
   Calendar,
   Timer,
   Target,
@@ -29,7 +26,10 @@ import {
   Mail,
   Slack,
   Chrome,
-  Globe
+  Globe,
+  Network,
+  Workflow,
+  Layers
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -150,8 +150,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <Workflow className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Network className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{dashboardData?.totalWorkflows || 0}</p>
@@ -168,8 +168,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-green-600" />
+                <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{dashboardData?.executionsToday || 0}</p>
@@ -186,8 +186,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <GitBranch className="w-5 h-5 text-gray-600" />
+                <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <Layers className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{dashboardData?.connectedApps || 0}</p>
@@ -204,8 +204,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-orange-600" />
+                <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{dashboardData?.thisWeek || 0}</p>
@@ -297,133 +297,124 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Main Content - Independent sections with fixed height */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        {/* Main Content - Three column layout */}
+        <div className="grid lg:grid-cols-3 gap-6">
           
-          {/* Recent Activity - Fixed height, no scroll */}
-          <div className="bg-white rounded-xl border border-gray-200 h-96">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-gray-700" />
-                <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+          {/* Left Column - Recent Activity */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-gray-200 h-96">
+              <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-gray-700" />
+                  <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                </div>
+                <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                  View all
+                </button>
               </div>
-              <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                View all
-              </button>
-            </div>
-            
-            <div className="p-4 overflow-hidden">
-              {dashboardData?.recentActivity?.length > 0 ? (
-                <div className="space-y-3">
-                  {dashboardData.recentActivity.slice(0, 4).map((activity) => (
-                    <div 
-                      key={activity.id} 
-                      className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-gray-200">
-                        {getActivityIcon(activity.type, activity.status)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{activity.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(activity.status)}`}>
-                            {activity.status}
-                          </span>
-                          {activity.duration && (
-                            <span className="text-xs text-gray-500">
-                              {activity.duration}
+              
+              <div className="p-4 overflow-hidden">
+                {dashboardData?.recentActivity?.length > 0 ? (
+                  <div className="space-y-3">
+                    {dashboardData.recentActivity.slice(0, 4).map((activity) => (
+                      <div 
+                        key={activity.id} 
+                        className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-gray-200">
+                          {getActivityIcon(activity.type, activity.status)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{activity.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(activity.status)}`}>
+                              {activity.status}
                             </span>
-                          )}
+                            {activity.duration && (
+                              <span className="text-xs text-gray-500">
+                                {activity.duration}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-72 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <Activity className="w-8 h-8 text-gray-400" />
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-72 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <Activity className="w-8 h-8 text-gray-400" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h3>
+                    <p className="text-gray-500 mb-6 max-w-sm">
+                      Start building workflows to see your automation activity here. Create your first workflow to get started.
+                    </p>
+                    <div className="space-y-3 w-full max-w-sm">
+                      <button
+                        onClick={() => navigate('/workflows/create')}
+                        className="w-full bg-gray-900 hover:bg-gray-800 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                      >
+                        Create Your First Workflow
+                      </button>
+                      <button
+                        onClick={() => navigate('/templates')}
+                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg transition-colors font-medium"
+                      >
+                        Browse Templates
+                      </button>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h3>
-                  <p className="text-gray-500 mb-6 max-w-sm">
-                    Start building workflows to see your automation activity here. Create your first workflow to get started.
-                  </p>
-                  <div className="space-y-3 w-full max-w-sm">
-                    <button
-                      onClick={() => navigate('/workflows/create')}
-                      className="w-full bg-gray-900 hover:bg-gray-800 text-white px-4 py-3 rounded-lg transition-colors font-medium"
-                    >
-                      Create Your First Workflow
-                    </button>
-                    <button
-                      onClick={() => navigate('/templates')}
-                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg transition-colors font-medium"
-                    >
-                      Browse Templates
-                    </button>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right Column - Stacked sections */}
+          {/* Right Column - Performance and Connected Apps */}
           <div className="space-y-6">
             
-            {/* Quick Actions - Fixed height, no scroll */}
-            <div className="bg-white rounded-xl border border-gray-200 h-96">
-              <div className="flex items-center gap-2 mb-4 p-4">
-                <Zap className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-semibold text-gray-900">Quick Actions</h3>
+            {/* Performance Stats */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-semibold text-gray-900">Performance Insight</h3>
               </div>
-              <div className="p-4 overflow-hidden">
-                <div className="space-y-2">
-                  <button 
-                    onClick={() => navigate('/workflows/create')}
-                    className="w-full flex items-center gap-3 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group"
-                  >
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                      <Plus className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-indigo-900">Create Workflow</p>
-                      <p className="text-xs text-indigo-600">Build new automation</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-indigo-400" />
-                  </button>
-                  
-                  <button 
-                    onClick={() => navigate('/integrations')}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
-                  >
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <Link2 className="w-4 h-4 text-gray-600" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-gray-900">Connect Apps</p>
-                      <p className="text-xs text-gray-500">Add integrations</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </button>
-                  
-                  <button 
-                    onClick={() => navigate('/analytics')}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
-                  >
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="w-4 h-4 text-gray-600" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-gray-900">View Analytics</p>
-                      <p className="text-xs text-gray-500">Performance insights</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </button>
+              
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Success Rate</span>
+                    <span className="font-semibold text-gray-500">--</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-gray-300 h-2 rounded-full" style={{width: '0%'}}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Avg. Execution Time</span>
+                    <span className="font-semibold text-gray-500">--</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-gray-300 h-2 rounded-full" style={{width: '0%'}}></div>
+                  </div>
+                </div>
+                
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500">No workflow executions yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Create workflows to see performance metrics</p>
                 </div>
               </div>
+              
+              <button 
+                onClick={() => navigate('/analytics')}
+                className="w-full mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-gray-50 hover:bg-indigo-50 py-2 px-4 rounded-lg transition-colors"
+              >
+                View Details
+              </button>
             </div>
 
             {/* Connected Apps */}
@@ -502,48 +493,6 @@ const Dashboard = () => {
                   <span className="text-sm text-gray-500">Connect Apps</span>
                 </button>
               </div>
-            </div>
-
-            {/* Performance Stats */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-semibold text-gray-900">Performance Insight</h3>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Success Rate</span>
-                    <span className="font-semibold text-gray-500">--</span>
-                  </div>
-                  <div className="w-full bg-white rounded-full h-2">
-                    <div className="bg-gray-300 h-2 rounded-full" style={{width: '0%'}}></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Avg. Execution Time</span>
-                    <span className="font-semibold text-gray-500">--</span>
-                  </div>
-                  <div className="w-full bg-white rounded-full h-2">
-                    <div className="bg-gray-300 h-2 rounded-full" style={{width: '0%'}}></div>
-                  </div>
-                </div>
-                
-                <div className="text-center py-4">
-                  <p className="text-sm text-gray-500">No workflow executions yet</p>
-                  <p className="text-xs text-gray-400 mt-1">Create workflows to see performance metrics</p>
-                </div>
-              </div>
-              
-              <button 
-                onClick={() => navigate('/analytics')}
-                className="w-full mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-white hover:bg-indigo-50 py-2 px-4 rounded-lg transition-colors"
-              >
-                View Details
-              </button>
             </div>
           </div>
         </div>
