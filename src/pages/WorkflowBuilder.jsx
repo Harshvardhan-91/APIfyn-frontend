@@ -93,10 +93,10 @@ const WorkflowBuilder = () => {
     triggers: [
       { 
         id: 'github-trigger', 
-        name: 'GitHub Push', 
+        name: 'GitHub Events', 
         icon: <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" className="w-5 h-5 rounded" />, 
         color: 'bg-gray-50', 
-        description: 'Triggered when code is pushed to repository',
+        description: 'Triggered by GitHub webhooks (push, PR, issues, etc.)',
         integrationRequired: true,
         integrationStatus: 'not-connected',
         category: 'Developer Tools'
@@ -1414,36 +1414,227 @@ const WorkflowBuilder = () => {
                   </div>
                 )}
 
+                {/* GitHub Trigger Configuration */}
+                {selectedBlock.type === 'github-trigger' && (
+                  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-6">GitHub Webhook Configuration</h4>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Repository
+                        </label>
+                        <select 
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                          onChange={(e) => {
+                            setBlocks(prev => prev.map(b => 
+                              b.id === selectedBlock.id 
+                                ? { ...b, config: { ...b.config, repository: e.target.value } }
+                                : b
+                            ));
+                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, repository: e.target.value } }));
+                          }}
+                          value={selectedBlock.config?.repository || ''}
+                        >
+                          <option value="">Select a repository</option>
+                          <option value="user/repo1">user/repo1</option>
+                          <option value="user/repo2">user/repo2</option>
+                          <option value="custom">Enter custom repository</option>
+                        </select>
+                        {selectedBlock.config?.repository === 'custom' && (
+                          <input
+                            type="text"
+                            placeholder="owner/repository-name"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm mt-3"
+                            onChange={(e) => {
+                              setBlocks(prev => prev.map(b => 
+                                b.id === selectedBlock.id 
+                                  ? { ...b, config: { ...b.config, customRepository: e.target.value } }
+                                  : b
+                              ));
+                              setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, customRepository: e.target.value } }));
+                            }}
+                            value={selectedBlock.config?.customRepository || ''}
+                          />
+                        )}
+                        <p className="text-xs text-gray-600 mt-2">Choose the GitHub repository to monitor</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          GitHub Events
+                        </label>
+                        <div className="space-y-3">
+                          {[
+                            { value: 'push', label: 'Push to repository', description: 'Triggered when code is pushed' },
+                            { value: 'pull_request', label: 'Pull Request', description: 'Opened, closed, or updated PR' },
+                            { value: 'issues', label: 'Issues', description: 'Issue opened, closed, or updated' },
+                            { value: 'release', label: 'Release', description: 'New release published' },
+                            { value: 'fork', label: 'Fork', description: 'Repository forked' }
+                          ].map((event) => (
+                            <label key={event.value} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                checked={selectedBlock.config?.events?.includes(event.value) || false}
+                                onChange={(e) => {
+                                  const events = selectedBlock.config?.events || [];
+                                  const newEvents = e.target.checked 
+                                    ? [...events, event.value]
+                                    : events.filter(ev => ev !== event.value);
+                                  
+                                  setBlocks(prev => prev.map(b => 
+                                    b.id === selectedBlock.id 
+                                      ? { ...b, config: { ...b.config, events: newEvents } }
+                                      : b
+                                  ));
+                                  setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, events: newEvents } }));
+                                }}
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">{event.label}</div>
+                                <div className="text-sm text-gray-600">{event.description}</div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div className="flex items-start gap-3">
+                          <Webhook className="w-5 h-5 text-blue-600 mt-0.5" />
+                          <div>
+                            <h5 className="font-medium text-blue-900 mb-1">Webhook URL</h5>
+                            <p className="text-sm text-blue-700 mb-2">This URL will be automatically registered with your repository:</p>
+                            <code className="text-xs bg-white p-2 rounded border text-gray-700 block break-all">
+                              https://api.apifyn.com/api/webhook/github/{selectedBlock.id}
+                            </code>
+                            <p className="text-xs text-blue-600 mt-2">✅ Webhook will be automatically configured when you save this workflow</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {selectedBlock.type === 'slack-send' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Slack Workspace
-                      </label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select Workspace</option>
-                        <option value="connect">Connect Slack Workspace</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Channel
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="#general or @username"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message
-                      </label>
-                      <textarea
-                        rows="4"
-                        placeholder="New lead: {{trigger.name}} - {{trigger.email}}"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      />
+                  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-6">Slack Message Configuration</h4>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Slack Workspace
+                        </label>
+                        <select 
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                          onChange={(e) => {
+                            setBlocks(prev => prev.map(b => 
+                              b.id === selectedBlock.id 
+                                ? { ...b, config: { ...b.config, workspace: e.target.value } }
+                                : b
+                            ));
+                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, workspace: e.target.value } }));
+                          }}
+                          value={selectedBlock.config?.workspace || ''}
+                        >
+                          <option value="">Select Workspace</option>
+                          <option value="primary">Primary Workspace</option>
+                          <option value="connect">Connect New Workspace</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Channel
+                        </label>
+                        <select 
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                          onChange={(e) => {
+                            setBlocks(prev => prev.map(b => 
+                              b.id === selectedBlock.id 
+                                ? { ...b, config: { ...b.config, channel: e.target.value } }
+                                : b
+                            ));
+                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, channel: e.target.value } }));
+                          }}
+                          value={selectedBlock.config?.channel || ''}
+                        >
+                          <option value="">Select a channel</option>
+                          <option value="#general">#general</option>
+                          <option value="#development">#development</option>
+                          <option value="#notifications">#notifications</option>
+                          <option value="custom">Custom channel/user</option>
+                        </select>
+                        {selectedBlock.config?.channel === 'custom' && (
+                          <input
+                            type="text"
+                            placeholder="#channel-name or @username"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm mt-3"
+                            onChange={(e) => {
+                              setBlocks(prev => prev.map(b => 
+                                b.id === selectedBlock.id 
+                                  ? { ...b, config: { ...b.config, customChannel: e.target.value } }
+                                  : b
+                              ));
+                              setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, customChannel: e.target.value } }));
+                            }}
+                            value={selectedBlock.config?.customChannel || ''}
+                          />
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Message Template
+                        </label>
+                        <textarea
+                          rows="4"
+                          placeholder="New PR: {{payload.pull_request.title}} by {{payload.pull_request.user.login}}"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                          onChange={(e) => {
+                            setBlocks(prev => prev.map(b => 
+                              b.id === selectedBlock.id 
+                                ? { ...b, config: { ...b.config, messageTemplate: e.target.value } }
+                                : b
+                            ));
+                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, messageTemplate: e.target.value } }));
+                          }}
+                          value={selectedBlock.config?.messageTemplate || ''}
+                        />
+                        <p className="text-xs text-gray-600 mt-2">
+                          Use <code>{"{{payload.field}}"}</code> to insert GitHub event data
+                        </p>
+                      </div>
+
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h5 className="font-medium text-green-900 mb-2">GitHub Event Variables</h5>
+                        <div className="space-y-1 text-sm text-green-700">
+                          <div><code>{"{{payload.repository.name}}"}</code> - Repository name</div>
+                          <div><code>{"{{payload.repository.full_name}}"}</code> - Full repository name</div>
+                          <div><code>{"{{payload.pusher.name}}"}</code> - User who pushed (for push events)</div>
+                          <div><code>{"{{payload.pull_request.title}}"}</code> - PR title (for PR events)</div>
+                          <div><code>{"{{payload.pull_request.user.login}}"}</code> - PR author</div>
+                          <div><code>{"{{payload.action}}"}</code> - Event action (opened, closed, etc.)</div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-3">
+                          Message Preview
+                        </label>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-700">
+                            {selectedBlock.config?.messageTemplate 
+                              ? selectedBlock.config.messageTemplate
+                                  .replace(/\{\{payload\.repository\.name\}\}/g, 'my-repo')
+                                  .replace(/\{\{payload\.repository\.full_name\}\}/g, 'user/my-repo')
+                                  .replace(/\{\{payload\.pusher\.name\}\}/g, 'john-doe')
+                                  .replace(/\{\{payload\.pull_request\.title\}\}/g, 'Fix bug in authentication')
+                                  .replace(/\{\{payload\.pull_request\.user\.login\}\}/g, 'jane-dev')
+                                  .replace(/\{\{payload\.action\}\}/g, 'opened')
+                              : 'Enter a message template to see preview...'}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
