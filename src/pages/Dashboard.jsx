@@ -159,7 +159,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-green-600">+12%</p>
+                <p className="text-sm font-medium text-gray-500">0%</p>
                 <p className="text-xs text-gray-400">This month</p>
               </div>
             </div>
@@ -177,7 +177,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-green-600">98.7%</p>
+                <p className="text-sm font-medium text-gray-500">--</p>
                 <p className="text-xs text-gray-400">Success rate</p>
               </div>
             </div>
@@ -195,8 +195,8 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-blue-600">8 active</p>
-                <p className="text-xs text-gray-400">This week</p>
+                <p className="text-sm font-medium text-gray-500">0 connected</p>
+                <p className="text-xs text-gray-400">Available: 5</p>
               </div>
             </div>
           </div>
@@ -213,7 +213,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-green-600">+24%</p>
+                <p className="text-sm font-medium text-gray-500">0%</p>
                 <p className="text-xs text-gray-400">vs last week</p>
               </div>
             </div>
@@ -313,34 +313,60 @@ const Dashboard = () => {
             </div>
             
             <div className="p-4 overflow-hidden">
-              <div className="space-y-3">
-                {dashboardData?.recentActivity?.slice(0, 4).map((activity) => ( // Limit to 4 items to fit height
-                  <div 
-                    key={activity.id} 
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-gray-200">
-                      {getActivityIcon(activity.type, activity.status)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{activity.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(activity.status)}`}>
-                          {activity.status}
-                        </span>
-                        {activity.duration && (
-                          <span className="text-xs text-gray-500">
-                            {activity.duration}
+              {dashboardData?.recentActivity?.length > 0 ? (
+                <div className="space-y-3">
+                  {dashboardData.recentActivity.slice(0, 4).map((activity) => (
+                    <div 
+                      key={activity.id} 
+                      className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-gray-200">
+                        {getActivityIcon(activity.type, activity.status)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{activity.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(activity.status)}`}>
+                            {activity.status}
                           </span>
-                        )}
+                          {activity.duration && (
+                            <span className="text-xs text-gray-500">
+                              {activity.duration}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-72 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <Activity className="w-8 h-8 text-gray-400" />
                   </div>
-                ))}
-              </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h3>
+                  <p className="text-gray-500 mb-6 max-w-sm">
+                    Start building workflows to see your automation activity here. Create your first workflow to get started.
+                  </p>
+                  <div className="space-y-3 w-full max-w-sm">
+                    <button
+                      onClick={() => navigate('/workflows/create')}
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                    >
+                      Create Your First Workflow
+                    </button>
+                    <button
+                      onClick={() => navigate('/templates')}
+                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg transition-colors font-medium"
+                    >
+                      Browse Templates
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -414,36 +440,58 @@ const Dashboard = () => {
               
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                    <Mail className="w-4 h-4 text-red-600" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                    <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" alt="Gmail" className="w-6 h-6 rounded" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Gmail</p>
-                    <p className="text-xs text-green-600">Connected</p>
+                    <p className="text-xs text-gray-500">Not Connected</p>
                   </div>
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                    <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" className="w-6 h-6 rounded" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Slack</p>
-                    <p className="text-xs text-green-600">Connected</p>
+                    <p className="text-xs text-gray-500">Not Connected</p>
                   </div>
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Database className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                    <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" className="w-6 h-6 rounded" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">GitHub</p>
+                    <p className="text-xs text-gray-500">Not Connected</p>
+                  </div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                    <img src="https://www.notion.so/images/favicon.ico" alt="Notion" className="w-6 h-6 rounded" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Notion</p>
-                    <p className="text-xs text-green-600">Connected</p>
+                    <p className="text-xs text-gray-500">Not Connected</p>
                   </div>
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                    <img src="https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png" alt="Google Sheets" className="w-6 h-6 rounded" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">Google Sheets</p>
+                    <p className="text-xs text-gray-500">Not Connected</p>
+                  </div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                 </div>
                 
                 <button 
@@ -451,7 +499,7 @@ const Dashboard = () => {
                   className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
                 >
                   <Plus className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-500">Add Integration</span>
+                  <span className="text-sm text-gray-500">Connect Apps</span>
                 </button>
               </div>
             </div>
@@ -467,21 +515,26 @@ const Dashboard = () => {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-600">Success Rate</span>
-                    <span className="font-semibold text-emerald-600">98.7%</span>
+                    <span className="font-semibold text-gray-500">--</span>
                   </div>
                   <div className="w-full bg-white rounded-full h-2">
-                    <div className="bg-emerald-500 h-2 rounded-full" style={{width: '98.7%'}}></div>
+                    <div className="bg-gray-300 h-2 rounded-full" style={{width: '0%'}}></div>
                   </div>
                 </div>
                 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-600">Avg. Execution Time</span>
-                    <span className="font-semibold text-blue-600">2.3s</span>
+                    <span className="font-semibold text-gray-500">--</span>
                   </div>
                   <div className="w-full bg-white rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '75%'}}></div>
+                    <div className="bg-gray-300 h-2 rounded-full" style={{width: '0%'}}></div>
                   </div>
+                </div>
+                
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500">No workflow executions yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Create workflows to see performance metrics</p>
                 </div>
               </div>
               
