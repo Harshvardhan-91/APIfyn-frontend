@@ -15,9 +15,9 @@ const WorkflowTemplates = () => {
       category: "Developer Tools",
       time: "2 mins setup",
       users: "1.8k users",
-      gradient: "from-gray-800 to-purple-800",
-      buttonColor: "bg-gray-800 hover:bg-gray-900",
-      iconBg: "bg-gray-100",
+      gradient: "from-gray-900 to-purple-600",
+      buttonColor: "bg-gray-600 hover:bg-gray-700",
+      iconBg: "bg-gray-50",
       steps: [
         { name: "GitHub", logo: "https://github.githubassets.com/favicons/favicon.svg", color: "#24292e" },
         { name: "Slack", logo: "https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png", color: "#4A154B" }
@@ -30,7 +30,7 @@ const WorkflowTemplates = () => {
       category: "Productivity",
       time: "3 mins setup",
       users: "1.2k users",
-      gradient: "from-black to-green-700",
+      gradient: "from-black to-green-600",
       buttonColor: "bg-green-600 hover:bg-green-700",
       iconBg: "bg-green-50",
       steps: [
@@ -68,7 +68,6 @@ const WorkflowTemplates = () => {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-blue-200"
           >
-            <Zap size={16} />
             <span>Ready-to-Use Templates</span>
           </motion.div>
 
@@ -201,7 +200,7 @@ const WorkflowTemplates = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full bg-gradient-to-r ${template.gradient} text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 group-hover:shadow-lg relative overflow-hidden`}
+                  className={`w-full ${template.buttonColor} text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 group-hover:shadow-lg relative overflow-hidden`}
                 >
                   <motion.div
                     className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"
