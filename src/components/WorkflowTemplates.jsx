@@ -15,7 +15,9 @@ const WorkflowTemplates = () => {
       category: "Developer Tools",
       time: "2 mins setup",
       users: "1.8k users",
-      gradient: "from-gray-800 via-gray-700 to-gray-900",
+      gradient: "from-gray-800 to-purple-800",
+      buttonColor: "bg-gray-800 hover:bg-gray-900",
+      iconBg: "bg-gray-100",
       steps: [
         { name: "GitHub", logo: "https://github.githubassets.com/favicons/favicon.svg", color: "#24292e" },
         { name: "Slack", logo: "https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png", color: "#4A154B" }
@@ -28,7 +30,9 @@ const WorkflowTemplates = () => {
       category: "Productivity",
       time: "3 mins setup",
       users: "1.2k users",
-      gradient: "from-slate-800 via-slate-700 to-slate-900",
+      gradient: "from-black to-green-700",
+      buttonColor: "bg-green-600 hover:bg-green-700",
+      iconBg: "bg-green-50",
       steps: [
         { name: "Notion", logo: "https://www.notion.so/images/favicon.ico", color: "#000000" },
         { name: "Google Sheets", logo: "https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png", color: "#34A853" }
@@ -49,7 +53,7 @@ const WorkflowTemplates = () => {
   )
 
   return (
-    <section id="templates" className="py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50" ref={ref}>
+    <section id="templates" className="py-24 bg-gray-50" ref={ref}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -62,7 +66,7 @@ const WorkflowTemplates = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-purple-100"
+            className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-blue-200"
           >
             <Zap size={16} />
             <span>Ready-to-Use Templates</span>
@@ -70,7 +74,7 @@ const WorkflowTemplates = () => {
 
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 tracking-tight">
             Start with{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            <span className="text-blue-600 font-bold">
               Proven Templates
             </span>
           </h2>
@@ -100,7 +104,7 @@ const WorkflowTemplates = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
-                  className="absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10 shadow-lg"
+                  className="absolute -top-3 -right-3 bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-bold z-10 shadow-lg"
                 >
                   <div className="flex items-center space-x-1">
                     <Zap size={12} />
@@ -115,7 +119,7 @@ const WorkflowTemplates = () => {
                   <div className="flex items-center space-x-4">
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: 5 }}
-                      className={`w-16 h-16 bg-gradient-to-br ${template.gradient} rounded-2xl flex items-center justify-center shadow-lg`}
+                      className={`w-16 h-16 ${template.iconBg} rounded-2xl flex items-center justify-center shadow-lg border border-gray-200`}
                     >
                       <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
                         <LogoIcon 
