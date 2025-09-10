@@ -213,6 +213,13 @@ const WorkflowBuilder = () => {
       if (response.ok) {
         const data = await response.json();
         setSlackChannels(data.channels || []);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.message && errorData.message.includes('re-authorized')) {
+          showToast('Slack integration needs to be updated. Please disconnect and reconnect your Slack account.', 'warning');
+        } else {
+          showToast('Failed to load Slack channels', 'error');
+        }
       }
     } catch (error) {
       console.error('Error fetching Slack channels:', error);
@@ -243,6 +250,17 @@ const WorkflowBuilder = () => {
           };
           console.log('Setting integrations state to:', newIntegrations);
           setIntegrations(newIntegrations);
+          
+          // Update block statuses based on integration status
+          setBlocks(prev => prev.map(block => {
+            if (block.type.includes('github') && newIntegrations.github.connected) {
+              return { ...block, integrationStatus: 'connected', status: 'configured' };
+            }
+            if (block.type.includes('slack') && newIntegrations.slack.connected) {
+              return { ...block, integrationStatus: 'connected', status: 'configured' };
+            }
+            return block;
+          }));
         }
       } catch (error) {
         console.error('Error checking integrations:', error);
@@ -284,6 +302,39 @@ const WorkflowBuilder = () => {
       fetchSlackChannels();
     }
   }, [integrations.slack.connected, fetchSlackChannels]);
+
+  // Sync integration status with blocks when integrations state changes
+  useEffect(() => {
+    const updatedBlocks = blocks.map(block => {
+      if (block.type.includes('github') && integrations.github.connected) {
+        return { ...block, integrationStatus: 'connected', status: 'configured' };
+      }
+      if (block.type.includes('slack') && integrations.slack.connected) {
+        return { ...block, integrationStatus: 'connected', status: 'configured' };
+      }
+      return block;
+    });
+    
+    // Check if there are actual integration status changes
+    const hasChanges = updatedBlocks.some((block, index) => 
+      block.integrationStatus !== blocks[index].integrationStatus || 
+      block.status !== blocks[index].status
+    );
+    
+    if (hasChanges) {
+      setBlocks(updatedBlocks);
+    }
+    
+    // Update selected block if it's affected
+    if (selectedBlock) {
+      if (selectedBlock.type.includes('github') && integrations.github.connected && selectedBlock.integrationStatus !== 'connected') {
+        setSelectedBlock(prev => ({ ...prev, integrationStatus: 'connected', status: 'configured' }));
+      }
+      if (selectedBlock.type.includes('slack') && integrations.slack.connected && selectedBlock.integrationStatus !== 'connected') {
+        setSelectedBlock(prev => ({ ...prev, integrationStatus: 'connected', status: 'configured' }));
+      }
+    }
+  }, [integrations.github.connected, integrations.slack.connected, blocks, selectedBlock]);
 
   // Block Library with only GitHub, Slack, Gmail, Notion, Google Sheets
   const blockLibrary = {
@@ -793,6 +844,18 @@ const WorkflowBuilder = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.integrations[provider]?.connected) {
+          // Update integrations state
+          setIntegrations(prev => ({
+            ...prev,
+            [provider]: {
+              ...prev[provider],
+              connected: true,
+              loading: false,
+              ...(provider === 'github' && data.integrations.github.user && { user: data.integrations.github.user }),
+              ...(provider === 'slack' && data.integrations.slack.workspaces && { workspaces: data.integrations.slack.workspaces })
+            }
+          }));
+
           // Update blocks that use this provider
           const providerTypes = [`${provider}-trigger`, `${provider}-send`];
           
@@ -1364,7 +1427,59 @@ const WorkflowBuilder = () => {
                           </span>
                         </div>
                         {selectedBlock.integrationStatus === 'connected' && (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <button
+                              onClick={async () => {
+                                if (confirm('Are you sure you want to disconnect this integration? You will need to re-authorize to use it again.')) {
+                                  try {
+                                    // Get the provider from block type
+                                    let provider = '';
+                                    if (selectedBlock.type.includes('github')) provider = 'github';
+                                    else if (selectedBlock.type.includes('slack')) provider = 'slack';
+                                    
+                                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/${provider}/disconnect`, {
+                                      method: 'DELETE',
+                                      headers: {
+                                        'Authorization': `Bearer ${user.idToken}`,
+                                        'Content-Type': 'application/json',
+                                      },
+                                    });
+                                    
+                                    if (response.ok) {
+                                      // Update local state
+                                      setIntegrations(prev => ({
+                                        ...prev,
+                                        [provider]: { ...prev[provider], connected: false }
+                                      }));
+                                      
+                                      // Update blocks
+                                      const providerTypes = [`${provider}-trigger`, `${provider}-send`];
+                                      setBlocks(prev => prev.map(b => 
+                                        providerTypes.includes(b.type)
+                                          ? { ...b, integrationStatus: 'not-connected', status: 'requires-integration' }
+                                          : b
+                                      ));
+                                      
+                                      if (selectedBlock && providerTypes.includes(selectedBlock.type)) {
+                                        setSelectedBlock(prev => ({ ...prev, integrationStatus: 'not-connected', status: 'requires-integration' }));
+                                      }
+                                      
+                                      showToast('Integration disconnected successfully!', 'success');
+                                    } else {
+                                      showToast('Failed to disconnect integration', 'error');
+                                    }
+                                  } catch (error) {
+                                    console.error('Disconnect error:', error);
+                                    showToast('Failed to disconnect integration', 'error');
+                                  }
+                                }
+                              }}
+                              className="text-sm text-red-600 hover:text-red-700 underline"
+                            >
+                              Disconnect
+                            </button>
+                          </div>
                         )}
                       </div>
                     
@@ -1783,7 +1898,7 @@ const WorkflowBuilder = () => {
                     <div className="space-y-6">
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-3">
-                          Slack Workspace
+                          Channel
                         </label>
                         
                         {!integrations.slack.connected ? (
@@ -1812,42 +1927,20 @@ const WorkflowBuilder = () => {
                             </div>
                           </div>
                         ) : (
-                          <select 
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                            onChange={(e) => {
-                              setBlocks(prev => prev.map(b => 
-                                b.id === selectedBlock.id 
-                                  ? { ...b, config: { ...b.config, workspace: e.target.value } }
-                                  : b
-                              ));
-                              setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, workspace: e.target.value } }));
-                            }}
-                            value={selectedBlock.config?.workspace || ''}
-                          >
-                            <option value="">Select Workspace</option>
-                            {integrations.slack.workspaces.map(workspace => (
-                              <option key={workspace.id} value={workspace.id}>
-                                {workspace.name}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-900 mb-3">
-                          Channel
-                        </label>
-                        
-                        {!integrations.slack.connected ? (
-                          <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50">
-                            <div className="flex items-center space-x-3">
-                              <AlertCircle className="w-5 h-5 text-gray-400" />
-                              <p className="text-sm text-gray-500">Connect Slack to view available channels</p>
+                          <div className="space-y-4">
+                            {/* Connected workspace info */}
+                            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              <span className="text-sm font-medium text-green-900">
+                                Connected to Slack workspace
+                              </span>
+                              {integrations.slack.workspaces?.length > 0 && (
+                                <span className="text-sm text-green-700">
+                                  ({integrations.slack.workspaces[0].name || 'workspace'})
+                                </span>
+                              )}
                             </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
+                            
                             {slackChannels.length > 8 && (
                               <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1924,7 +2017,7 @@ const WorkflowBuilder = () => {
                         </label>
                         <textarea
                           rows="4"
-                          placeholder="New PR: {{payload.pull_request.title}} by {{payload.pull_request.user.login}}"
+                          placeholder="🚀 New code update in {{repository_name}} by {{author_name}}!"
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
                           onChange={(e) => {
                             setBlocks(prev => prev.map(b => 
@@ -1934,15 +2027,35 @@ const WorkflowBuilder = () => {
                             ));
                             setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, messageTemplate: e.target.value } }));
                           }}
-                          value={selectedBlock.config?.messageTemplate || ''}
+                          value={selectedBlock.config?.messageTemplate || 'Hi team! 👋 New changes made to the repository. Check it out! 🚀'}
                         />
                         <p className="text-xs text-gray-600 mt-2">
-                          Use <code>{"{{payload.field}}"}</code> to insert GitHub event data
+                          Use simple variables like <code>{"{{repository_name}}"}</code> or <code>{"{{author_name}}"}</code> in your message
                         </p>
                       </div>
 
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h5 className="font-medium text-blue-900 mb-2">📝 Message Variables Guide</h5>
+                        <div className="space-y-2 text-sm text-blue-700">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div><code>{"{{repository_name}}"}</code> → Repository name</div>
+                            <div><code>{"{{author_name}}"}</code> → Person who made changes</div>
+                            <div><code>{"{{pull_request_title}}"}</code> → Pull request title</div>
+                            <div><code>{"{{action}}"}</code> → What happened (opened, closed)</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 p-3 bg-white rounded border border-blue-200">
+                          <p className="text-xs font-medium text-blue-900 mb-1">💡 Example Messages:</p>
+                          <div className="text-xs text-blue-700 space-y-1">
+                            <div>• "🚀 New push to your repository by team member"</div>
+                            <div>• "📝 New PR: Feature request is ready for review"</div>
+                            <div>• "✅ Pull request opened in your repository"</div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <h5 className="font-medium text-green-900 mb-2">GitHub Event Variables</h5>
+                        <h5 className="font-medium text-green-900 mb-2">Advanced Variables (Optional)</h5>
                         <div className="space-y-1 text-sm text-green-700">
                           <div><code>{"{{payload.repository.name}}"}</code> - Repository name</div>
                           <div><code>{"{{payload.repository.full_name}}"}</code> - Full repository name</div>
@@ -1961,14 +2074,25 @@ const WorkflowBuilder = () => {
                           <div className="text-sm text-gray-700">
                             {selectedBlock.config?.messageTemplate 
                               ? selectedBlock.config.messageTemplate
-                                  .replace(/\{\{payload\.repository\.name\}\}/g, 'my-repo')
-                                  .replace(/\{\{payload\.repository\.full_name\}\}/g, 'user/my-repo')
+                                  // Simple variable replacements
+                                  .replace(/\{\{repository_name\}\}/g, 'my-awesome-project')
+                                  .replace(/\{\{author_name\}\}/g, 'john-doe')
+                                  .replace(/\{\{pull_request_title\}\}/g, 'Fix bug in authentication')
+                                  .replace(/\{\{action\}\}/g, 'opened')
+                                  // Advanced variable replacements (backward compatibility)
+                                  .replace(/\{\{payload\.repository\.name\}\}/g, 'my-awesome-project')
+                                  .replace(/\{\{payload\.repository\.full_name\}\}/g, 'user/my-awesome-project')
                                   .replace(/\{\{payload\.pusher\.name\}\}/g, 'john-doe')
                                   .replace(/\{\{payload\.pull_request\.title\}\}/g, 'Fix bug in authentication')
                                   .replace(/\{\{payload\.pull_request\.user\.login\}\}/g, 'jane-dev')
                                   .replace(/\{\{payload\.action\}\}/g, 'opened')
                               : 'Enter a message template to see preview...'}
                           </div>
+                          {selectedBlock.config?.messageTemplate && (
+                            <div className="mt-2 text-xs text-gray-500">
+                              💡 This is how your message will look when sent to Slack
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
