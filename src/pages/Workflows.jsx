@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 import { 
   Plus, 
@@ -18,10 +19,44 @@ import { useNavigate } from 'react-router-dom';
 
 const Workflows = () => {
   const navigate = useNavigate();
-  const [workflows] = useState([]);
-  const [loading] = useState(false);
+  const { user } = useAuth();
+  const [workflows, setWorkflows] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  // Fetch workflows from backend
+  useEffect(() => {
+    const fetchWorkflows = async () => {
+      if (!user?.idToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
+          headers: {
+            'Authorization': `Bearer ${user.idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched workflows:', data);
+          setWorkflows(data.workflows || []);
+        } else {
+          console.error('Failed to fetch workflows:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching workflows:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkflows();
+  }, [user?.idToken]);
 
   // Process workflows to ensure all required fields exist
   const processedWorkflows = workflows.map(workflow => ({

@@ -454,17 +454,22 @@ const WorkflowBuilder = () => {
 
   const handleSave = useCallback(async () => {
     try {
+      console.log('handleSave called');
       if (!user?.idToken) {
         showToast('Please log in to save workflows', 'error');
         return;
       }
 
       if (!workflowName.trim()) {
+        console.log('No workflow name, showing naming dialog');
         // Show naming dialog instead of toast
         setTempWorkflowName(workflowName);
         setShowNamingDialog(true);
         return;
       }
+
+      console.log('Workflow name:', workflowName);
+      console.log('Blocks:', blocks.length);
 
       if (blocks.length === 0) {
         showToast('Please add at least one block to your workflow', 'warning');
@@ -510,9 +515,10 @@ const WorkflowBuilder = () => {
         },
         category: 'general',
         triggerType: 'MANUAL',
-        isActive: false
+        isActive: true // Make workflows active by default
       };
 
+      console.log('Workflow data to save:', workflowData);
       showToast('Saving workflow...', 'info');
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
@@ -524,8 +530,11 @@ const WorkflowBuilder = () => {
         body: JSON.stringify(workflowData),
       });
 
+      console.log('Response status:', response.status);
+
       if (response.ok) {
         const result = await response.json();
+        console.log('Save result:', result);
         if (result.success) {
           showToast('Workflow saved successfully! 🎉', 'success');
           setTimeout(() => navigate('/workflows'), 1500);
@@ -534,6 +543,7 @@ const WorkflowBuilder = () => {
         }
       } else {
         const errorData = await response.json();
+        console.log('Error response:', errorData);
         showToast('Failed to save workflow: ' + (errorData.error || response.statusText), 'error');
       }
     } catch (error) {

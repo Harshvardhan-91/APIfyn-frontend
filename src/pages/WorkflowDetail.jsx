@@ -109,6 +109,34 @@ const WorkflowDetail = () => {
     }
   };
 
+  const handleTestWorkflow = async () => {
+    if (!workflow) return;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/webhooks/test/${id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Test workflow result:', result);
+        alert('Test workflow triggered successfully! Check your Slack channel.');
+        // Refresh the page to see new execution data
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert('Test failed: ' + (errorData.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error testing workflow:', error);
+      alert('Error testing workflow: ' + error.message);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'SUCCESS': return <CheckCircle className="w-4 h-4 text-green-500" />;
@@ -202,6 +230,14 @@ const WorkflowDetail = () => {
             >
               {workflow.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {workflow.isActive ? 'Pause' : 'Activate'}
+            </button>
+            
+            <button
+              onClick={handleTestWorkflow}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-colors"
+            >
+              <Activity className="w-4 h-4" />
+              Test Workflow
             </button>
             
             <button
