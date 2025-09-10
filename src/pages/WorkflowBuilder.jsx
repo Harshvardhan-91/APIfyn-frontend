@@ -29,10 +29,25 @@ import {
   TestTube,
   Rocket,
   MousePointer,
-  Link
+  Link,
+  ExternalLink,
+  Lock,
+  AlertCircle,
+  Plus,
+  Github,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Copy,
+  Play
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+
+// Generate unique ID
+const generateUniqueId = (prefix = 'id') => {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
 
 const WorkflowBuilder = () => {
   const { user } = useAuth();
@@ -58,6 +73,18 @@ const WorkflowBuilder = () => {
   const [connections, setConnections] = useState([]);
   const [draggedBlock, setDraggedBlock] = useState(null);
   
+  // OAuth Integration States
+  const [integrations, setIntegrations] = useState({
+    github: { connected: false, user: null, loading: false },
+    slack: { connected: false, workspaces: [], loading: false }
+  });
+  const [repositories, setRepositories] = useState([]);
+  const [slackChannels, setSlackChannels] = useState([]);
+  const [repositoriesLoading, setRepositoriesLoading] = useState(false);
+  const [channelsLoading, setChannelsLoading] = useState(false);
+  const [repoSearchTerm, setRepoSearchTerm] = useState('');
+  const [channelSearchTerm, setChannelSearchTerm] = useState('');
+  
   // Connection functionality
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionStart, setConnectionStart] = useState(null);
@@ -73,7 +100,7 @@ const WorkflowBuilder = () => {
 
   // Toast function
   const showToast = useCallback((message, type = 'info') => {
-    const id = Date.now();
+    const id = generateUniqueId('toast');
     const newToast = { id, message, type };
     setToasts(prev => [...prev, newToast]);
     
@@ -87,6 +114,176 @@ const WorkflowBuilder = () => {
   const removeToast = useCallback((id) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
+
+  // OAuth Integration Functions
+  const handleGitHubAuth = async () => {
+    try {
+      setIntegrations(prev => ({
+        ...prev,
+        github: { ...prev.github, loading: true }
+      }));
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/github/auth`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        window.open(data.authUrl, '_blank', 'width=600,height=600');
+      }
+    } catch (error) {
+      console.error('GitHub auth error:', error);
+      showToast('Failed to initiate GitHub authentication', 'error');
+    } finally {
+      setIntegrations(prev => ({
+        ...prev,
+        github: { ...prev.github, loading: false }
+      }));
+    }
+  };
+
+  const handleSlackAuth = async () => {
+    try {
+      setIntegrations(prev => ({
+        ...prev,
+        slack: { ...prev.slack, loading: true }
+      }));
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/slack/auth`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        window.open(data.authUrl, '_blank', 'width=600,height=600');
+      }
+    } catch (error) {
+      console.error('Slack auth error:', error);
+      showToast('Failed to initiate Slack authentication', 'error');
+    } finally {
+      setIntegrations(prev => ({
+        ...prev,
+        slack: { ...prev.slack, loading: false }
+      }));
+    }
+  };
+
+  const fetchRepositories = useCallback(async () => {
+    if (!integrations.github.connected) return;
+    
+    try {
+      setRepositoriesLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/github/repositories`, {
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setRepositories(data.repositories || []);
+      }
+    } catch (error) {
+      console.error('Error fetching repositories:', error);
+      showToast('Failed to load repositories', 'error');
+    } finally {
+      setRepositoriesLoading(false);
+    }
+  }, [integrations.github.connected, user?.idToken, showToast]);
+
+  const fetchSlackChannels = useCallback(async () => {
+    if (!integrations.slack.connected) return;
+    
+    try {
+      setChannelsLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/slack/channels`, {
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSlackChannels(data.channels || []);
+      }
+    } catch (error) {
+      console.error('Error fetching Slack channels:', error);
+      showToast('Failed to load Slack channels', 'error');
+    } finally {
+      setChannelsLoading(false);
+    }
+  }, [integrations.slack.connected, user?.idToken, showToast]);
+
+  // Check integration status on component mount
+  useEffect(() => {
+    const checkIntegrations = async () => {
+      if (!user?.idToken) return;
+      
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/status`, {
+          headers: {
+            'Authorization': `Bearer ${user.idToken}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Integration status response:', data);
+          const newIntegrations = data.integrations || {
+            github: { connected: false, user: null, loading: false },
+            slack: { connected: false, workspaces: [], loading: false }
+          };
+          console.log('Setting integrations state to:', newIntegrations);
+          setIntegrations(newIntegrations);
+        }
+      } catch (error) {
+        console.error('Error checking integrations:', error);
+      }
+    };
+    
+    checkIntegrations();
+
+    // Listen for OAuth success messages
+    const handleMessage = (event) => {
+      // Allow messages from our backend domain (GitHub OAuth callback)
+      const allowedOrigins = [window.location.origin, import.meta.env.VITE_API_URL];
+      if (!allowedOrigins.some(origin => event.origin.startsWith(origin))) return;
+      
+      if (event.data.type === 'github_auth_success' || event.data.type === 'slack_auth_success') {
+        // Refresh integration status with a small delay to ensure backend is updated
+        setTimeout(() => {
+          checkIntegrations();
+        }, 1000);
+        showToast('Integration connected successfully!', 'success');
+      } else if (event.data.type === 'github_auth_error' || event.data.type === 'slack_auth_error') {
+        showToast(`Authentication failed: ${event.data.error}`, 'error');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [user?.idToken, showToast]);
+
+  // Fetch repositories and channels when integrations become connected
+  useEffect(() => {
+    if (integrations.github.connected) {
+      fetchRepositories();
+    }
+  }, [integrations.github.connected, fetchRepositories]);
+
+  useEffect(() => {
+    if (integrations.slack.connected) {
+      fetchSlackChannels();
+    }
+  }, [integrations.slack.connected, fetchSlackChannels]);
 
   // Block Library with only GitHub, Slack, Gmail, Notion, Google Sheets
   const blockLibrary = {
@@ -395,7 +592,7 @@ const WorkflowBuilder = () => {
     const y = (e.clientY - rect.top - canvasPosition.y) / zoom;
 
     const newBlock = {
-      id: `block-${Date.now()}`,
+      id: generateUniqueId('block'),
       type: draggedBlock.id,
       name: draggedBlock.name,
       icon: draggedBlock.icon,
@@ -441,7 +638,7 @@ const WorkflowBuilder = () => {
       
       if (!existingConnection) {
         const newConnection = {
-          id: `connection-${Date.now()}`,
+          id: generateUniqueId('connection'),
           from: connectionStart,
           to: blockId,
           status: 'active'
@@ -585,7 +782,7 @@ const WorkflowBuilder = () => {
   // Function to check integration status from backend
   const checkIntegrationStatus = useCallback(async (provider) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/status`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${user.idToken}`,
@@ -595,7 +792,7 @@ const WorkflowBuilder = () => {
       
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.integrations[provider] === 'connected') {
+        if (data.success && data.integrations[provider]?.connected) {
           // Update blocks that use this provider
           const providerTypes = [`${provider}-trigger`, `${provider}-send`];
           
@@ -1185,6 +1382,7 @@ const WorkflowBuilder = () => {
                               let provider = '';
                               if (selectedBlock.type.includes('gmail')) provider = 'gmail';
                               else if (selectedBlock.type.includes('slack')) provider = 'slack';
+                              else if (selectedBlock.type.includes('github')) provider = 'github';
                               else if (selectedBlock.type.includes('notion')) provider = 'notion';
                               else if (selectedBlock.type.includes('discord')) provider = 'discord';
                               else if (selectedBlock.type.includes('stripe')) provider = 'stripe';
@@ -1196,8 +1394,8 @@ const WorkflowBuilder = () => {
                               }
                               
                               // Call backend to get OAuth URL
-                              const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integration/oauth/${provider}/authorize`, {
-                                method: 'GET',
+                              const response = await fetch(`${import.meta.env.VITE_API_URL}/api/integrations/${provider}/auth`, {
+                                method: 'POST',
                                 headers: {
                                   'Authorization': `Bearer ${user.idToken}`,
                                   'Content-Type': 'application/json',
@@ -1423,23 +1621,86 @@ const WorkflowBuilder = () => {
                         <label className="block text-sm font-semibold text-gray-900 mb-3">
                           Repository
                         </label>
-                        <select 
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                          onChange={(e) => {
-                            setBlocks(prev => prev.map(b => 
-                              b.id === selectedBlock.id 
-                                ? { ...b, config: { ...b.config, repository: e.target.value } }
-                                : b
-                            ));
-                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, repository: e.target.value } }));
-                          }}
-                          value={selectedBlock.config?.repository || ''}
-                        >
-                          <option value="">Select a repository</option>
-                          <option value="user/repo1">user/repo1</option>
-                          <option value="user/repo2">user/repo2</option>
-                          <option value="custom">Enter custom repository</option>
-                        </select>
+                        
+                        {!integrations.github.connected ? (
+                          <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <Lock className="w-5 h-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">GitHub Not Connected</p>
+                                  <p className="text-xs text-gray-500">Connect your GitHub account to access repositories</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={handleGitHubAuth}
+                                disabled={integrations.github.loading}
+                                className="flex items-center space-x-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                              >
+                                {integrations.github.loading ? (
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <Github className="w-4 h-4" />
+                                )}
+                                <span>Connect GitHub</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {repositories.length > 8 && (
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Search repositories..."
+                                  value={repoSearchTerm}
+                                  onChange={(e) => setRepoSearchTerm(e.target.value)}
+                                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                />
+                              </div>
+                            )}
+                            
+                            <select 
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                              onChange={(e) => {
+                                setBlocks(prev => prev.map(b => 
+                                  b.id === selectedBlock.id 
+                                    ? { ...b, config: { ...b.config, repository: e.target.value } }
+                                    : b
+                                ));
+                                setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, repository: e.target.value } }));
+                              }}
+                              value={selectedBlock.config?.repository || ''}
+                              disabled={repositoriesLoading}
+                            >
+                              <option value="">
+                                {repositoriesLoading ? 'Loading repositories...' : 'Select a repository'}
+                              </option>
+                              {repositories
+                                .filter(repo => 
+                                  !repoSearchTerm || 
+                                  repo.full_name.toLowerCase().includes(repoSearchTerm.toLowerCase())
+                                )
+                                .slice(0, 8)
+                                .map(repo => (
+                                  <option key={repo.id} value={repo.full_name}>
+                                    {repo.full_name} {repo.private ? '(Private)' : '(Public)'}
+                                  </option>
+                                ))
+                              }
+                              <option value="custom">Enter custom repository</option>
+                            </select>
+                            
+                            {repositories.length > 8 && (
+                              <p className="text-xs text-gray-500">
+                                Showing top 8 results. Use search to find specific repositories.
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
                         {selectedBlock.config?.repository === 'custom' && (
                           <input
                             type="text"
@@ -1524,46 +1785,121 @@ const WorkflowBuilder = () => {
                         <label className="block text-sm font-semibold text-gray-900 mb-3">
                           Slack Workspace
                         </label>
-                        <select 
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                          onChange={(e) => {
-                            setBlocks(prev => prev.map(b => 
-                              b.id === selectedBlock.id 
-                                ? { ...b, config: { ...b.config, workspace: e.target.value } }
-                                : b
-                            ));
-                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, workspace: e.target.value } }));
-                          }}
-                          value={selectedBlock.config?.workspace || ''}
-                        >
-                          <option value="">Select Workspace</option>
-                          <option value="primary">Primary Workspace</option>
-                          <option value="connect">Connect New Workspace</option>
-                        </select>
+                        
+                        {!integrations.slack.connected ? (
+                          <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <Lock className="w-5 h-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">Slack Not Connected</p>
+                                  <p className="text-xs text-gray-500">Connect your Slack workspace to access channels</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={handleSlackAuth}
+                                disabled={integrations.slack.loading}
+                                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                              >
+                                {integrations.slack.loading ? (
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <MessageSquare className="w-4 h-4" />
+                                )}
+                                <span>Connect Slack</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <select 
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                            onChange={(e) => {
+                              setBlocks(prev => prev.map(b => 
+                                b.id === selectedBlock.id 
+                                  ? { ...b, config: { ...b.config, workspace: e.target.value } }
+                                  : b
+                              ));
+                              setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, workspace: e.target.value } }));
+                            }}
+                            value={selectedBlock.config?.workspace || ''}
+                          >
+                            <option value="">Select Workspace</option>
+                            {integrations.slack.workspaces.map(workspace => (
+                              <option key={workspace.id} value={workspace.id}>
+                                {workspace.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
                       
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-3">
                           Channel
                         </label>
-                        <select 
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                          onChange={(e) => {
-                            setBlocks(prev => prev.map(b => 
-                              b.id === selectedBlock.id 
-                                ? { ...b, config: { ...b.config, channel: e.target.value } }
-                                : b
-                            ));
-                            setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, channel: e.target.value } }));
-                          }}
-                          value={selectedBlock.config?.channel || ''}
-                        >
-                          <option value="">Select a channel</option>
-                          <option value="#general">#general</option>
-                          <option value="#development">#development</option>
-                          <option value="#notifications">#notifications</option>
-                          <option value="custom">Custom channel/user</option>
-                        </select>
+                        
+                        {!integrations.slack.connected ? (
+                          <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50">
+                            <div className="flex items-center space-x-3">
+                              <AlertCircle className="w-5 h-5 text-gray-400" />
+                              <p className="text-sm text-gray-500">Connect Slack to view available channels</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {slackChannels.length > 8 && (
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Search channels..."
+                                  value={channelSearchTerm}
+                                  onChange={(e) => setChannelSearchTerm(e.target.value)}
+                                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                />
+                              </div>
+                            )}
+                            
+                            <select 
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                              onChange={(e) => {
+                                setBlocks(prev => prev.map(b => 
+                                  b.id === selectedBlock.id 
+                                    ? { ...b, config: { ...b.config, channel: e.target.value } }
+                                    : b
+                                ));
+                                setSelectedBlock(prev => ({ ...prev, config: { ...prev.config, channel: e.target.value } }));
+                              }}
+                              value={selectedBlock.config?.channel || ''}
+                              disabled={channelsLoading}
+                            >
+                              <option value="">
+                                {channelsLoading ? 'Loading channels...' : 'Select a channel'}
+                              </option>
+                              {slackChannels
+                                .filter(channel => 
+                                  !channelSearchTerm || 
+                                  channel.name.toLowerCase().includes(channelSearchTerm.toLowerCase())
+                                )
+                                .slice(0, 8)
+                                .map(channel => (
+                                  <option key={channel.id} value={channel.id}>
+                                    #{channel.name} {channel.is_private ? '(Private)' : ''}
+                                  </option>
+                                ))
+                              }
+                              <option value="custom">Custom channel/user</option>
+                            </select>
+                            
+                            {slackChannels.length > 8 && (
+                              <p className="text-xs text-gray-500">
+                                Showing top 8 results. Use search to find specific channels.
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
                         {selectedBlock.config?.channel === 'custom' && (
                           <input
                             type="text"
