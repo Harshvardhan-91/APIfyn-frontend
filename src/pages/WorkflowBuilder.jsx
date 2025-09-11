@@ -559,14 +559,103 @@ const WorkflowBuilder = () => {
       return;
     }
     
-    setWorkflowName(tempWorkflowName);
-    setShowNamingDialog(false);
+    console.log('handleNamingConfirm called with name:', tempWorkflowName);
     
-    // Proceed with save after setting the name
-    setTimeout(() => {
-      handleSave();
-    }, 100);
-  }, [tempWorkflowName, handleSave, showToast]);
+    try {
+      if (!user?.idToken) {
+        showToast('Please log in to save workflows', 'error');
+        setShowNamingDialog(false);
+        return;
+      }
+
+      if (blocks.length === 0) {
+        showToast('Please add at least one block to your workflow', 'warning');
+        setShowNamingDialog(false);
+        return;
+      }
+
+      // Check for unintegrated apps
+      const unintegratedBlocks = blocks.filter(block => 
+        block.integrationRequired && 
+        (block.integrationStatus === 'not-connected' || block.status === 'requires-integration')
+      );
+
+      if (unintegratedBlocks.length > 0) {
+        const blockNames = unintegratedBlocks.map(block => block.name).join(', ');
+        showToast(
+          `Please integrate these apps before saving: ${blockNames}. Click on each block to authorize the integration.`, 
+          'warning'
+        );
+        setShowNamingDialog(false);
+        return;
+      }
+
+      // Close dialog immediately and show saving message
+      setShowNamingDialog(false);
+      showToast('Saving workflow...', 'info');
+
+      // Clean the blocks data for JSON serialization
+      const cleanBlocks = blocks.map(block => ({
+        id: block.id,
+        type: block.type,
+        name: block.name,
+        description: block.description,
+        position: block.position,
+        config: block.config || {},
+        status: block.status,
+        // Remove the JSX icon and color classes that can't be serialized
+        iconType: block.type, // Keep track of type for icon recreation
+        colorClass: block.color
+      }));
+
+      const workflowData = {
+        name: tempWorkflowName.trim(), // Use tempWorkflowName directly
+        description: `Workflow with ${blocks.length} blocks and ${connections.length} connections`,
+        definition: {
+          blocks: cleanBlocks,
+          connections: connections,
+          canvas: { zoom, position: canvasPosition }
+        },
+        category: 'general',
+        triggerType: 'MANUAL',
+        isActive: true // Make workflows active by default
+      };
+
+      console.log('Workflow data to save:', workflowData);
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowData),
+      });
+
+      console.log('Response status:', response.status);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Save result:', result);
+        if (result.success) {
+          // Update the workflow name in state after successful save
+          setWorkflowName(tempWorkflowName.trim());
+          showToast('Workflow saved successfully! 🎉', 'success');
+          setTimeout(() => navigate('/workflows'), 1500);
+        } else {
+          showToast('Failed to save workflow: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } else {
+        const errorData = await response.json();
+        console.log('Error response:', errorData);
+        showToast('Failed to save workflow: ' + (errorData.error || response.statusText), 'error');
+      }
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+      showToast('Error saving workflow: ' + error.message, 'error');
+      setShowNamingDialog(false);
+    }
+  }, [tempWorkflowName, user, blocks, connections, zoom, canvasPosition, navigate, showToast]);
 
   const handleBlockDelete = useCallback((blockId) => {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
