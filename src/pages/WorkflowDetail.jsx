@@ -248,10 +248,6 @@ const WorkflowDetail = () => {
               Edit
             </button>
             
-            <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors">
-              <Share className="w-4 h-4" />
-              Share
-            </button>
             
             <button
               onClick={handleDelete}
