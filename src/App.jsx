@@ -9,6 +9,7 @@ import Hero from './components/Hero'
 import Features from './components/Features'
 import WorkflowTemplates from './components/WorkflowTemplates'
 import HowItWorks from './components/HowItWorks'
+import WorkflowCreationGuide from './components/WorkflowCreationGuide'
 import PricingComponent from './components/Pricing'
 import Footer from './components/Footer'
 import Dashboard from './pages/Dashboard'
@@ -34,8 +35,8 @@ const LandingPage = () => {
       <div className="mx-[5%]">
         <Features />
         <WorkflowTemplates />
-        <HowItWorks />
-                <PricingComponent />
+        <WorkflowCreationGuide />
+        <PricingComponent />
       </div>
       <Footer />
     </div>
