@@ -42,7 +42,7 @@ import {
   Play
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Generate unique ID
 const generateUniqueId = (prefix = 'id') => {
@@ -52,11 +52,12 @@ const generateUniqueId = (prefix = 'id') => {
 const WorkflowBuilder = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams(); // Get workflow ID from URL params for editing
   const canvasRef = useRef(null);
   const svgRef = useRef(null);
   
   const [workflowName, setWorkflowName] = useState('');
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(!!id); // true if editing existing workflow
   const [showNamingDialog, setShowNamingDialog] = useState(false);
   const [tempWorkflowName, setTempWorkflowName] = useState('');
   const [zoom, setZoom] = useState(1);
@@ -97,6 +98,34 @@ const WorkflowBuilder = () => {
 
   // Toast notifications
   const [toasts, setToasts] = useState([]);
+
+  // Function to reconstruct icons based on block type
+  const getIconForBlockType = (blockType) => {
+    console.log('Getting icon for block type:', blockType);
+    switch (blockType) {
+      case 'github-trigger':
+        return <Github className="w-6 h-6 text-white" />;
+      case 'slack-send':
+        return <MessageSquare className="w-6 h-6 text-white" />;
+      case 'webhook':
+        return <Webhook className="w-6 h-6 text-white" />;
+      case 'http-request':
+        return <Zap className="w-6 h-6 text-white" />;
+      case 'email-send':
+        return <Mail className="w-6 h-6 text-white" />;
+      case 'database-query':
+        return <Database className="w-6 h-6 text-white" />;
+      case 'condition':
+        return <Filter className="w-6 h-6 text-white" />;
+      case 'delay':
+        return <Clock className="w-6 h-6 text-white" />;
+      case 'transform':
+        return <Code className="w-6 h-6 text-white" />;
+      default:
+        console.warn(`Unknown block type: ${blockType}, using default icon`);
+        return <Settings className="w-6 h-6 text-white" />;
+    }
+  };
 
   // Toast function
   const showToast = useCallback((message, type = 'info') => {
@@ -296,6 +325,83 @@ const WorkflowBuilder = () => {
       fetchRepositories();
     }
   }, [integrations.github.connected, fetchRepositories]);
+
+  // Load existing workflow when in edit mode
+  useEffect(() => {
+    const loadExistingWorkflow = async () => {
+      if (!user?.idToken || !id) return;
+      
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${user.idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.workflow) {
+            const workflow = result.workflow;
+            
+            // Set workflow name
+            setWorkflowName(workflow.name);
+            
+            // Load workflow definition (blocks and connections)
+            if (workflow.definition) {
+              // Reconstruct blocks with proper icons and ensure colors are preserved
+              const blocksWithIcons = (workflow.definition.blocks || []).map(block => {
+                const icon = getIconForBlockType(block.type || block.iconType);
+                console.log(`Reconstructing icon for block ${block.id} (${block.type}):`, icon);
+                
+                // Ensure color class is properly set
+                let colorClass = block.color || block.colorClass;
+                if (!colorClass) {
+                  // Default colors based on block type
+                  switch (block.type || block.iconType) {
+                    case 'github-trigger':
+                      colorClass = 'bg-gray-800';
+                      break;
+                    case 'slack-send':
+                      colorClass = 'bg-purple-600';
+                      break;
+                    default:
+                      colorClass = 'bg-blue-600';
+                  }
+                }
+                
+                return {
+                  ...block,
+                  icon: icon,
+                  color: colorClass
+                };
+              });
+              
+              console.log('Loaded blocks with icons:', blocksWithIcons);
+              setBlocks(blocksWithIcons);
+              setConnections(workflow.definition.connections || []);
+            }
+            
+            showToast(`Loaded workflow: ${workflow.name}`, 'success');
+          } else {
+            showToast('Failed to load workflow', 'error');
+            navigate('/workflows');
+          }
+        } else {
+          showToast('Workflow not found', 'error');
+          navigate('/workflows');
+        }
+      } catch (error) {
+        console.error('Error loading workflow:', error);
+        showToast('Failed to load workflow', 'error');
+        navigate('/workflows');
+      }
+    };
+
+    if (id) {
+      loadExistingWorkflow();
+    }
+  }, [id, user?.idToken, navigate, showToast]);
 
   useEffect(() => {
     if (integrations.slack.connected) {
@@ -521,8 +627,14 @@ const WorkflowBuilder = () => {
       console.log('Workflow data to save:', workflowData);
       showToast('Saving workflow...', 'info');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
-        method: 'POST',
+      // Use PUT for updates, POST for new workflows
+      const isUpdate = !!id;
+      const url = isUpdate 
+        ? `${import.meta.env.VITE_API_URL}/api/workflow/${id}`
+        : `${import.meta.env.VITE_API_URL}/api/workflow`;
+      
+      const response = await fetch(url, {
+        method: isUpdate ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${user.idToken}`,
           'Content-Type': 'application/json',
@@ -550,7 +662,7 @@ const WorkflowBuilder = () => {
       console.error('Error saving workflow:', error);
       showToast('Error saving workflow: ' + error.message, 'error');
     }
-  }, [user, workflowName, blocks, connections, zoom, canvasPosition, navigate, showToast]);
+  }, [user, workflowName, blocks, connections, zoom, canvasPosition, navigate, showToast, id]);
 
   // Handle naming dialog confirmation
   const handleNamingConfirm = useCallback(async () => {
@@ -623,8 +735,14 @@ const WorkflowBuilder = () => {
 
       console.log('Workflow data to save:', workflowData);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/workflow`, {
-        method: 'POST',
+      // Use PUT for updates, POST for new workflows
+      const isUpdate = !!id;
+      const url = isUpdate 
+        ? `${import.meta.env.VITE_API_URL}/api/workflow/${id}`
+        : `${import.meta.env.VITE_API_URL}/api/workflow`;
+
+      const response = await fetch(url, {
+        method: isUpdate ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${user.idToken}`,
           'Content-Type': 'application/json',
@@ -655,7 +773,7 @@ const WorkflowBuilder = () => {
       showToast('Error saving workflow: ' + error.message, 'error');
       setShowNamingDialog(false);
     }
-  }, [tempWorkflowName, user, blocks, connections, zoom, canvasPosition, navigate, showToast]);
+  }, [tempWorkflowName, user, blocks, connections, zoom, canvasPosition, navigate, showToast, id]);
 
   const handleBlockDelete = useCallback((blockId) => {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
